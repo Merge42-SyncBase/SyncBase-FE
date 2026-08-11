@@ -3,12 +3,20 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
+  "engines": {
+    "node": ">=24.15.0",
+    "npm": ">=10"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "docker:build": "docker compose build web",
+    "docker:dev": "docker compose --profile dev up --build web-dev",
+    "docker:up": "docker compose up --build web",
     "preview": "vite preview",
     "test": "vitest",
-    "test:run": "vitest run"
+    "test:run": "vitest run",
+    "test:docker": "docker compose --profile test run --build --rm web-test"
   },
   "dependencies": {
     "react": "latest",

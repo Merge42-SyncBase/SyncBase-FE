@@ -18,6 +18,16 @@ describe('SyncBase frontend MVP', () => {
     window.history.replaceState({}, '', '/login')
   })
 
+  it('로그인에는 세 사람 역할만 노출하고 서비스 자격은 노출하지 않는다', () => {
+    render(<App />)
+
+    expect(screen.getAllByRole('button')).toHaveLength(3)
+    expect(screen.getByRole('button', { name: /DOCUMENT_ADMIN/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /AI_SEARCH_USER/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /OPERATOR/ })).toBeInTheDocument()
+    expect(screen.queryByText('MCP_CLIENT')).not.toBeInTheDocument()
+  })
+
   it('선택한 역할로 로그인하고 문서 작업 공간으로 이동한다', async () => {
     await loginAs('문서 관리자')
 

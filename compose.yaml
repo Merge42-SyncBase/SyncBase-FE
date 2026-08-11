@@ -1,0 +1,33 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    ports:
+      - "127.0.0.1:${SYNCBASE_WEB_PORT:-8080}:80"
+
+  web-dev:
+    profiles: [dev]
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    environment:
+      CHOKIDAR_USEPOLLING: "true"
+    command: ["sh", "-c", "npm ci && exec npm run dev -- --host 0.0.0.0 --port 5173"]
+    ports:
+      - "127.0.0.1:${SYNCBASE_WEB_DEV_PORT:-5173}:5173"
+    volumes:
+      - .:/app
+      - web-node-modules:/app/node_modules
+
+  web-test:
+    profiles: [test]
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: test
+
+volumes:
+  web-node-modules:

@@ -1,0 +1,14 @@
+node_modules
+dist
+coverage
+.git
+.gitignore
+.DS_Store
+npm-debug.log*
+.env
+.env.*
+!.env.example
+.npmrc
+*.local
+docs
+README.md

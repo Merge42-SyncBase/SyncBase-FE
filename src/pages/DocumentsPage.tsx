@@ -1,149 +1,85 @@
-import { useMemo, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { activeVersion, latestVersion } from '../domain'
-import { useDemo } from '../demo/DemoProvider'
-import { DemoControls } from '../components/DemoControls'
+import { useEffect, useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
+import { APIError, api } from '../api/client'
+import { ErrorNotice } from '../components/ErrorNotice'
 import { StatusBadge } from '../components/StatusBadge'
+import type { DocumentSummary } from '../types'
 
 export function DocumentsPage() {
-  const {
-    documents,
-    session,
-    system,
-    writeLocked,
-    triggerFailover,
-    beginRecovery,
-    resetDemo,
-  } = useDemo()
-  const [query, setQuery] = useState('')
-  const navigate = useNavigate()
+  const [documents, setDocuments] = useState<DocumentSummary[]>([])
+  const [filter, setFilter] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(true)
 
-  const filtered = useMemo(
-    () => documents.filter((document) => document.name.toLowerCase().includes(query.toLowerCase())),
-    [documents, query],
-  )
-  const processingCount = documents.filter((document) => {
-    const status = latestVersion(document).status
-    return ['PREFLIGHTING', 'UPLOADING', 'VERIFYING', 'QUEUED', 'PROCESSING', 'RETRYING'].includes(status)
-  }).length
-  const failedCount = documents.filter((document) => latestVersion(document).status.startsWith('FAILED')).length
+  useEffect(() => {
+    let mounted = true
+    async function load() {
+      try {
+        const response = await api.documents()
+        if (mounted) setDocuments(response.documents)
+      } catch (reason) {
+        if (mounted) setError(reason instanceof APIError ? reason.message : '문서 목록을 불러오지 못했습니다.')
+      } finally {
+        if (mounted) setLoading(false)
+      }
+    }
+    void load()
+    const timer = window.setInterval(() => void load(), 5000)
+    return () => { mounted = false; window.clearInterval(timer) }
+  }, [])
+
+  const visible = useMemo(() => {
+    const normalized = filter.trim().toLocaleLowerCase()
+    return normalized ? documents.filter((document) => document.name.toLocaleLowerCase().includes(normalized)) : documents
+  }, [documents, filter])
+  const searchable = documents.filter((document) => document.activeVersion !== null).length
+  const processing = documents.filter((document) => document.latestStatus === 'QUEUED' || document.latestStatus === 'PROCESSING').length
+  const attention = documents.filter((document) => document.latestStatus === 'FAILED').length
 
   return (
     <div className="page-stack">
-      <header className="page-header">
-        <div>
-          <span className="eyebrow">Document workspace</span>
-          <h1>문서</h1>
-          <p>활성 버전과 최신 처리 상태를 한곳에서 확인합니다.</p>
-        </div>
-        {session?.role === 'DOCUMENT_ADMIN' && (
-          <button
-            className="button button-primary"
-            disabled={writeLocked}
-            onClick={() => navigate('/documents/new')}
-            title={writeLocked ? '복구 중에는 등록할 수 없습니다.' : undefined}
-          >
-            새 문서 등록
-          </button>
-        )}
+      <header className="page-header split">
+        <div><p className="eyebrow">Knowledge library</p><h1>문서</h1><p className="muted">등록된 PDF의 처리 상태와 검색 공개 버전을 확인합니다.</p></div>
+        <Link className="button primary" to="/documents/new">PDF 등록</Link>
       </header>
-
-      <section className="metric-grid" aria-label="문서 상태 요약">
-        <article className="metric-card">
-          <span>전체 문서</span>
-          <strong>{documents.length}</strong>
-          <small>단일 mock workspace</small>
-        </article>
-        <article className="metric-card">
-          <span>처리 진행</span>
-          <strong>{processingCount}</strong>
-          <small>대기·처리·재시도 포함</small>
-        </article>
-        <article className="metric-card">
-          <span>확인 필요</span>
-          <strong>{failedCount}</strong>
-          <small>실패 상태 문서</small>
-        </article>
+      <section className="metrics" aria-label="문서 상태 요약">
+        <Metric label="전체 문서" value={documents.length} />
+        <Metric label="검색 가능" value={searchable} tone="good" />
+        <Metric label="처리 중" value={processing} tone="pending" />
+        <Metric label="확인 필요" value={attention} tone="danger" />
       </section>
-
-      {(session?.role === 'DOCUMENT_ADMIN' || session?.role === 'OPERATOR') && (
-        <DemoControls
-          phase={system.phase}
-          onFailover={triggerFailover}
-          onRecover={beginRecovery}
-          onReset={resetDemo}
-        />
-      )}
-
-      <section className="content-panel" aria-labelledby="document-list-title">
-        <div className="panel-header">
-          <div>
-            <h2 id="document-list-title">문서 목록</h2>
-            <p>{filtered.length}개의 문서를 표시합니다.</p>
-          </div>
-          <label className="search-field">
-            <span className="sr-only">문서명 검색</span>
-            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="문서명 검색" />
-          </label>
-        </div>
-
-        {filtered.length === 0 ? (
-          <div className="empty-state">
-            <strong>일치하는 문서가 없습니다.</strong>
-            <p>검색어를 지우거나 새 문서를 등록하세요.</p>
-            <button className="button button-secondary" onClick={() => setQuery('')}>검색 초기화</button>
-          </div>
-        ) : (
-          <>
-            <div className="table-wrap document-table-wrap">
-              <table className="document-table">
-                <thead>
-                  <tr>
-                    <th>문서명</th>
-                    <th>활성 버전</th>
-                    <th>최신 처리 상태</th>
-                    <th>수정 시각</th>
-                    <th><span className="sr-only">상세 보기</span></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filtered.map((document) => {
-                    const latest = latestVersion(document)
-                    const active = activeVersion(document)
-                    return (
-                      <tr key={document.id}>
-                        <td>
-                          <Link className="document-name" to={`/documents/${document.id}`}>{document.name}</Link>
-                          <small>{document.versions.length}개 버전</small>
-                        </td>
-                        <td>{active?.label ?? '없음'}</td>
-                        <td><StatusBadge status={latest.status} /></td>
-                        <td>{document.updatedAt}</td>
-                        <td><Link className="text-link" to={`/documents/${document.id}`}>상세</Link></td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
-            </div>
-            <div className="document-card-list">
-              {filtered.map((document) => {
-                const latest = latestVersion(document)
-                const active = activeVersion(document)
-                return (
-                  <Link className="document-mobile-card" key={document.id} to={`/documents/${document.id}`}>
-                    <div><strong>{document.name}</strong><StatusBadge status={latest.status} /></div>
-                    <dl>
-                      <div><dt>활성 버전</dt><dd>{active?.label ?? '없음'}</dd></div>
-                      <div><dt>수정</dt><dd>{document.updatedAt}</dd></div>
-                    </dl>
-                  </Link>
-                )
-              })}
-            </div>
-          </>
-        )}
+      {error && <ErrorNotice>{error}</ErrorNotice>}
+      <section className="panel">
+        <div className="panel-header split"><div><h2>문서 라이브러리</h2><p>5초마다 실제 처리 상태를 갱신합니다.</p></div><label className="filter"><span className="sr-only">문서명 필터</span><input placeholder="문서명 검색" value={filter} onChange={(event) => setFilter(event.target.value)} /></label></div>
+        {loading ? <div className="skeleton-list" aria-live="polite">문서를 불러오는 중입니다.</div> : visible.length === 0 ? (
+          <div className="empty-state"><strong>표시할 문서가 없습니다.</strong><p>PDF를 등록하면 처리 현황이 이곳에 표시됩니다.</p></div>
+        ) : <DocumentTable documents={visible} />}
       </section>
     </div>
   )
+}
+
+function Metric({ label, value, tone = '' }: { label: string; value: number; tone?: string }) {
+  return <article className={`metric ${tone}`}><span>{label}</span><strong>{value}</strong></article>
+}
+
+function DocumentTable({ documents }: { documents: DocumentSummary[] }) {
+  return (
+    <div className="table-wrap">
+      <table>
+        <thead><tr><th>문서</th><th>최신 버전</th><th>검색 공개</th><th>상태</th><th>갱신</th></tr></thead>
+        <tbody>{documents.map((document) => <tr key={document.id}>
+          <td><Link className="document-link" to={`/documents/${document.id}`}>{document.name}</Link></td>
+          <td>v{document.latestVersion}</td>
+          <td>{document.activeVersion === null ? '—' : `v${document.activeVersion}`}</td>
+          <td><StatusBadge status={document.latestStatus} /></td>
+          <td>{formatDate(document.updatedAt)}</td>
+        </tr>)}</tbody>
+      </table>
+    </div>
+  )
+}
+
+function formatDate(value: string): string {
+  return new Intl.DateTimeFormat('ko-KR', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value))
 }

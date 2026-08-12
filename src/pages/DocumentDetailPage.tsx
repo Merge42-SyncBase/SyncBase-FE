@@ -1,134 +1,80 @@
+import { useCallback, useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { activeVersion, latestVersion, STATUS_META } from '../domain'
-import { useDemo } from '../demo/DemoProvider'
+import { APIError, api } from '../api/client'
+import { useAuth } from '../auth/AuthProvider'
+import { ErrorNotice } from '../components/ErrorNotice'
 import { StatusBadge } from '../components/StatusBadge'
+import type { DocumentDetails, DocumentVersion, ProcessingStage } from '../types'
 
-const processingOrder = ['PREFLIGHTING', 'UPLOADING', 'VERIFYING', 'QUEUED', 'PROCESSING', 'ACTIVE']
+const stages: ProcessingStage[] = ['METADATA', 'PARSE', 'CHUNK', 'EMBED', 'STORE', 'ACTIVATE']
+const stageLabels: Record<ProcessingStage, string> = {
+  METADATA: '확인', PARSE: '텍스트 추출', CHUNK: '문단 분리', EMBED: '임베딩', STORE: '저장', ACTIVATE: '검색 반영',
+}
 
 export function DocumentDetailPage() {
-  const { documentId = '' } = useParams()
-  const { getDocument, session, writeLocked, retryVersion } = useDemo()
-  const document = getDocument(documentId)
+  const { documentID = '' } = useParams()
+  const { session } = useAuth()
+  const [document, setDocument] = useState<DocumentDetails | null>(null)
+  const [error, setError] = useState('')
+  const [retrying, setRetrying] = useState<string | null>(null)
 
-  if (!document) {
-    return (
-      <div className="empty-state content-panel">
-        <strong>문서를 확인할 수 없습니다.</strong>
-        <p>문서가 없거나 현재 역할에 허용되지 않았습니다.</p>
-        <Link className="button button-secondary" to="/documents">문서 목록으로</Link>
-      </div>
-    )
+  const load = useCallback(async () => {
+    try {
+      setDocument(await api.document(documentID))
+      setError('')
+    } catch (reason) {
+      setError(reason instanceof APIError ? reason.message : '문서 상세를 불러오지 못했습니다.')
+    }
+  }, [documentID])
+
+  useEffect(() => {
+    void load()
+    const timer = window.setInterval(() => void load(), 2500)
+    return () => window.clearInterval(timer)
+  }, [load])
+
+  async function retry(version: DocumentVersion) {
+    if (!session) return
+    setRetrying(version.runId)
+    try {
+      await api.retry(version.runId, crypto.randomUUID(), session.csrfToken)
+      await load()
+    } catch (reason) {
+      setError(reason instanceof APIError ? reason.message : '재시도 요청을 완료하지 못했습니다.')
+    } finally {
+      setRetrying(null)
+    }
   }
 
-  const latest = latestVersion(document)
-  const active = activeVersion(document)
-  const currentIndex =
-    latest.status === 'RETRYING'
-      ? processingOrder.indexOf('PROCESSING')
-      : Math.max(0, processingOrder.indexOf(latest.status))
+  if (error && !document) return <ErrorNotice>{error}</ErrorNotice>
+  if (!document) return <div className="skeleton-list" aria-live="polite">문서 상세를 불러오는 중입니다.</div>
+  const active = document.versions.find((version) => version.active)
 
   return (
     <div className="page-stack">
-      <header className="page-header detail-header">
-        <div>
-          <span className="eyebrow">Document detail</span>
-          <h1>{document.name}</h1>
-          <p>활성 버전과 모든 처리 이력을 확인합니다.</p>
-        </div>
-        <div className="header-actions">
-          {active && <Link className="button button-secondary" to={`/sources/${active.id}?page=1`}>활성 원문 보기</Link>}
-          {session?.role === 'DOCUMENT_ADMIN' && (
-            <Link
-              className={`button button-primary ${writeLocked ? 'is-disabled' : ''}`}
-              aria-disabled={writeLocked}
-              onClick={(event) => writeLocked && event.preventDefault()}
-              to={`/documents/new?documentId=${document.id}`}
-            >
-              새 버전 등록
-            </Link>
-          )}
-        </div>
-      </header>
-
-      <section className="detail-summary-grid">
-        <article className="content-panel summary-card">
-          <span>현재 활성 버전</span>
-          <strong>{active?.label ?? '없음'}</strong>
-          <small>{active ? 'MCP 검색 가능' : '처리 완료 후 검색 가능'}</small>
-        </article>
-        <article className="content-panel summary-card">
-          <span>최신 처리 상태</span>
-          <StatusBadge status={latest.status} />
-          <small>{latest.stage}</small>
-        </article>
-        <article className="content-panel summary-card">
-          <span>마지막 수정</span>
-          <strong className="summary-date">{document.updatedAt}</strong>
-          <small>{document.versions.length}개 버전</small>
-        </article>
-      </section>
-
-      {!['ACTIVE', 'COMPLETED_INACTIVE', 'FAILED_RETRYABLE', 'FAILED_FINAL'].includes(latest.status) && (
-        <section className="content-panel" aria-labelledby="progress-title">
-          <div className="panel-header compact">
-            <div><h2 id="progress-title">처리 진행</h2><p>{latest.stage}</p></div>
-            <strong>{latest.progress}%</strong>
-          </div>
-          <div className="progress-bar" aria-label={`처리 진행률 ${latest.progress}%`}>
-            <span style={{ width: `${latest.progress}%` }} />
-          </div>
-          <ol className="stepper">
-            {processingOrder.map((status, index) => (
-              <li key={status} className={index < currentIndex ? 'done' : index === currentIndex ? 'current' : ''}>
-                <span aria-hidden="true">{index < currentIndex ? '✓' : index + 1}</span>
-                {STATUS_META[status as keyof typeof STATUS_META].label}
-              </li>
-            ))}
-          </ol>
-        </section>
-      )}
-
-      <section className="content-panel" aria-labelledby="versions-title">
-        <div className="panel-header">
-          <div><h2 id="versions-title">버전 이력</h2><p>처리 중인 새 버전에도 기존 활성 버전은 유지됩니다.</p></div>
-        </div>
-        <div className="version-list">
-          {document.versions.map((version) => (
-            <article className="version-row" key={version.id}>
-              <div className="version-main">
-                <strong>{version.label}</strong>
-                <StatusBadge status={version.status} />
-                {document.activeVersionId === version.id && <span className="active-label">현재 검색 버전</span>}
-              </div>
-              <dl className="version-meta">
-                <div><dt>등록</dt><dd>{version.createdAt}</dd></div>
-                <div><dt>페이지</dt><dd>{version.pages}</dd></div>
-                <div><dt>단계</dt><dd>{version.stage}</dd></div>
-              </dl>
-              {version.requestKey && (
-                <details className="request-details">
-                  <summary>등록 복구 정보</summary>
-                  <code>request: {version.requestKey}</code>
-                  <code>fingerprint: {version.fingerprint}</code>
-                </details>
-              )}
-              <div className="version-actions">
-                <Link className="button button-secondary" to={`/sources/${version.id}?page=1`}>원문 확인</Link>
-                {version.status === 'FAILED_RETRYABLE' && session?.role === 'DOCUMENT_ADMIN' && (
-                  <button
-                    className="button button-primary"
-                    disabled={writeLocked}
-                    onClick={() => retryVersion(document.id, version.id)}
-                  >
-                    처리 재시도
-                  </button>
-                )}
-                {version.status === 'FAILED_FINAL' && <span className="danger-copy">수정한 PDF를 새 버전으로 등록하세요.</span>}
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
+      <header className="page-header split"><div><Link className="back-link" to="/documents">← 문서 목록</Link><p className="eyebrow">Document detail</p><h1>{document.name}</h1><p className="muted">최신 버전이 활성화되기 전까지 이전 ACTIVE 버전만 검색됩니다.</p></div><Link className="button primary" to={`/documents/${document.id}/versions/new`}>새 버전 등록</Link></header>
+      {error && <ErrorNotice>{error}</ErrorNotice>}
+      {active && <div className="notice success">현재 검색에 노출된 버전은 <strong>v{active.versionNumber}</strong>입니다. <Link to={`/sources/${document.id}/versions/${active.versionNumber}?page=1`}>원문 열기</Link></div>}
+      <section className="page-stack">{document.versions.map((version) => <article className="panel version-card" key={version.id}>
+        <div className="panel-header split"><div><div className="version-title"><h2>v{version.versionNumber}</h2><StatusBadge status={version.status} />{version.active && <span className="active-chip">현재 검색 버전</span>}</div><p>{formatDate(version.updatedAt)} · {version.pageCount ? `${version.pageCount}페이지` : '페이지 확인 중'}</p></div><div className="version-actions">{version.pageCount > 0 && <Link className="button secondary" to={`/sources/${document.id}/versions/${version.versionNumber}?page=1`}>원문 확인</Link>}{version.manualRetryAllowed && <button className="button secondary" disabled={retrying === version.runId} onClick={() => void retry(version)}>{retrying === version.runId ? '재시도 요청 중…' : '처리 재시도'}</button>}</div></div>
+        <Pipeline version={version} />
+        {version.errorCode && <div className="notice error">{errorLabel(version.errorCode)} <code>{version.errorCode}</code></div>}
+        <dl className="metadata"><div><dt>처리 작업</dt><dd><code>{version.runId}</code></dd></div><div><dt>상관 ID</dt><dd><code>{version.correlationId}</code></dd></div><div><dt>자동 시도</dt><dd>{version.automaticAttempts} / 3{version.queuePosition ? ` · 대기 ${version.queuePosition}번` : ''}</dd></div></dl>
+      </article>)}</section>
     </div>
   )
 }
+
+function Pipeline({ version }: { version: DocumentVersion }) {
+  const current = stages.indexOf(version.stage)
+  return <ol className="pipeline">{stages.map((stage, index) => {
+    const state = version.status === 'FAILED' && index === current ? 'failed' : index < current || ['ACTIVE', 'SUPERSEDED'].includes(version.status) ? 'complete' : index === current && version.status === 'PROCESSING' ? 'current' : 'pending'
+    return <li className={state} key={stage}><span aria-hidden="true">{state === 'complete' ? '✓' : state === 'failed' ? '!' : index + 1}</span><strong>{stageLabels[stage]}</strong></li>
+  })}</ol>
+}
+
+function errorLabel(code: string): string {
+  return ({ INVALID_INPUT: 'PDF 형식이나 텍스트 내용을 확인하세요.', PROFILE_MISMATCH: '임베딩 프로필이 일치하지 않습니다.', TRANSIENT_EXHAUSTED: '자동 재시도를 모두 사용했습니다.' } as Record<string, string>)[code] ?? '처리 중 오류가 발생했습니다.'
+}
+
+function formatDate(value: string): string { return new Intl.DateTimeFormat('ko-KR', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value)) }

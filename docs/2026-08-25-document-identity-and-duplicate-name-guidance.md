@@ -149,6 +149,8 @@ render exception.
 - Go 1.26.6 `gofmt` completed for all changed Go files.
 - `go test ./internal/modules/documents ./internal/transport/webapp
   ./internal/adapters/postgres` passed.
-- PostgreSQL integration assertion is included and runs when
-  `SYNCBASE_TEST_DB_URL` is available; otherwise that existing test suite skips
-  database-backed cases.
+- The database-backed
+  `TestRegisterDocumentIsAtomicAndIdempotent` regression passed against a
+  disposable local PostgreSQL/pgvector instance. It verified that a separate
+  same-name registration receives a different UUID and that the normalized-name
+  lookup reports the full count while returning the requested bounded sample.

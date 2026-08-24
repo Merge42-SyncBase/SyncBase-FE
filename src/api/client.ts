@@ -3,6 +3,7 @@ import type {
   DocumentDetails,
   DocumentListResponse,
   DocumentNameMatches,
+  DocumentSummary,
   Preflight,
   Registration,
   SearchResponse,
@@ -72,11 +73,8 @@ function parseDocumentNameMatches(payload: unknown): DocumentNameMatches {
     typeof value.normalizedName !== 'string' ||
     typeof value.total !== 'number' || !Number.isInteger(value.total) || value.total < 0 ||
     !Array.isArray(value.documents) ||
-    value.documents.some((document) => (
-      typeof document !== 'object' || document === null ||
-      typeof (document as Record<string, unknown>).id !== 'string' ||
-      typeof (document as Record<string, unknown>).name !== 'string'
-    ))
+    value.documents.length > value.total ||
+    value.documents.some((document) => !isDocumentSummary(document))
   ) {
     throw new APIError(502, {
       error: {
@@ -87,6 +85,23 @@ function parseDocumentNameMatches(payload: unknown): DocumentNameMatches {
     })
   }
   return payload as DocumentNameMatches
+}
+
+function isDocumentSummary(payload: unknown): payload is DocumentSummary {
+  if (typeof payload !== 'object' || payload === null) return false
+  const value = payload as Record<string, unknown>
+  const activeVersion = value.activeVersion
+  return (
+    typeof value.id === 'string' &&
+    typeof value.name === 'string' &&
+    (activeVersion === null || (
+      typeof activeVersion === 'number' && Number.isInteger(activeVersion) && activeVersion >= 1
+    )) &&
+    typeof value.latestVersion === 'number' && Number.isInteger(value.latestVersion) && value.latestVersion >= 1 &&
+    typeof value.latestStatus === 'string' &&
+    ['QUEUED', 'PROCESSING', 'ACTIVE', 'FAILED', 'SUPERSEDED'].includes(value.latestStatus) &&
+    typeof value.updatedAt === 'string'
+  )
 }
 
 function csrfHeaders(csrfToken: string): HeadersInit {

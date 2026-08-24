@@ -83,8 +83,14 @@ describe('browser API client', () => {
   it('rejects a malformed normalized-name guidance response', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({
       normalizedName: '보안 정책',
-      total: 'two',
-      documents: [],
+      total: 1,
+      documents: [{
+        id: '11111111-1111-4111-8111-111111111111',
+        name: '보안 정책',
+        activeVersion: null,
+        latestStatus: 'ACTIVE',
+        updatedAt: '2026-08-25T00:00:00Z',
+      }],
     }), { status: 200, headers: { 'Content-Type': 'application/json' } })))
 
     await expect(api.documentNameMatches('보안 정책')).rejects.toMatchObject({
@@ -92,6 +98,24 @@ describe('browser API client', () => {
       code: 'INVALID_RESPONSE',
       status: 502,
       retryable: true,
+    })
+
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({
+      normalizedName: '보안 정책',
+      total: 0,
+      documents: [{
+        id: '11111111-1111-4111-8111-111111111111',
+        name: '보안 정책',
+        activeVersion: 1,
+        latestVersion: 1,
+        latestStatus: 'ACTIVE',
+        updatedAt: '2026-08-25T00:00:00Z',
+      }],
+    }), { status: 200, headers: { 'Content-Type': 'application/json' } })))
+
+    await expect(api.documentNameMatches('보안 정책')).rejects.toMatchObject({
+      name: 'APIError',
+      code: 'INVALID_RESPONSE',
     })
   })
 })

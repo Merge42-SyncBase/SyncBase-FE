@@ -30,5 +30,6 @@ docker build -t syncbase/web:local .
 - 로그인은 Go WAS가 발급하는 HttpOnly 세션 쿠키와 CSRF 토큰을 사용합니다.
 - PDF 등록은 서버 preflight, SHA-256, request key 기반 recovery를 거칩니다.
 - 문서 상세는 실제 Worker 상태를 polling합니다.
+- 문서명은 중복을 허용하되 등록 전에 같은 정규화 이름을 안내하며, 목록은 UUID의 짧은 표기를 함께 보여 구분합니다.
 - 검색은 WAS가 MCP `search_documents`를 호출한 결과만 표시합니다.
 - 원문 화면은 PDF.js canvas와 text layer로 정확한 document/version/page를 렌더링합니다.

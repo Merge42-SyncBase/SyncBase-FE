@@ -2,6 +2,7 @@ import type {
   APIErrorPayload,
   DocumentDetails,
   DocumentListResponse,
+  DocumentNameMatches,
   Preflight,
   Registration,
   SearchResponse,
@@ -46,6 +47,48 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   return (await response.json()) as T
 }
 
+function parseDocumentDetails(payload: unknown): DocumentDetails {
+  if (
+    typeof payload !== 'object' || payload === null ||
+    typeof (payload as Record<string, unknown>).id !== 'string' ||
+    typeof (payload as Record<string, unknown>).name !== 'string' ||
+    !Array.isArray((payload as Record<string, unknown>).versions)
+  ) {
+    throw new APIError(502, {
+      error: {
+        code: 'INVALID_RESPONSE',
+        message: '문서 상세 응답 형식이 올바르지 않습니다.',
+        retryable: true,
+      },
+    })
+  }
+  return payload as DocumentDetails
+}
+
+function parseDocumentNameMatches(payload: unknown): DocumentNameMatches {
+  const value = payload as Record<string, unknown> | null
+  if (
+    typeof value !== 'object' || value === null ||
+    typeof value.normalizedName !== 'string' ||
+    typeof value.total !== 'number' || !Number.isInteger(value.total) || value.total < 0 ||
+    !Array.isArray(value.documents) ||
+    value.documents.some((document) => (
+      typeof document !== 'object' || document === null ||
+      typeof (document as Record<string, unknown>).id !== 'string' ||
+      typeof (document as Record<string, unknown>).name !== 'string'
+    ))
+  ) {
+    throw new APIError(502, {
+      error: {
+        code: 'INVALID_RESPONSE',
+        message: '같은 이름의 문서 확인 응답 형식이 올바르지 않습니다.',
+        retryable: true,
+      },
+    })
+  }
+  return payload as DocumentNameMatches
+}
+
 function csrfHeaders(csrfToken: string): HeadersInit {
   return { 'X-CSRF-Token': csrfToken }
 }
@@ -74,8 +117,14 @@ export const api = {
     return request<DocumentListResponse>(`/api/v1/documents?limit=${limit}&offset=${offset}`)
   },
 
-  document(documentID: string): Promise<DocumentDetails> {
-    return request<DocumentDetails>(`/api/v1/documents/${encodeURIComponent(documentID)}`)
+  async documentNameMatches(name: string): Promise<DocumentNameMatches> {
+    const payload = await request<unknown>(`/api/v1/documents/name-matches?name=${encodeURIComponent(name)}`)
+    return parseDocumentNameMatches(payload)
+  },
+
+  async document(documentID: string): Promise<DocumentDetails> {
+    const payload = await request<unknown>(`/api/v1/documents/${encodeURIComponent(documentID)}`)
+    return parseDocumentDetails(payload)
   },
 
   preflight(file: File, csrfToken: string): Promise<Preflight> {

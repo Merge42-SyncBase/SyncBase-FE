@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { APIError, api } from '../api/client'
 import { ErrorNotice } from '../components/ErrorNotice'
 import { StatusBadge } from '../components/StatusBadge'
+import { shortDocumentID } from '../documents/identity'
 import type { DocumentSummary } from '../types'
 
 export function DocumentsPage() {
@@ -69,7 +70,7 @@ function DocumentTable({ documents }: { documents: DocumentSummary[] }) {
       <table>
         <thead><tr><th>문서</th><th>최신 버전</th><th>검색 공개</th><th>상태</th><th>갱신</th></tr></thead>
         <tbody>{documents.map((document) => <tr key={document.id}>
-          <td><Link className="document-link" to={`/documents/${document.id}`}>{document.name}</Link></td>
+          <td><div className="document-name-cell"><Link className="document-link" to={`/documents/${document.id}`}>{document.name}</Link><span className="document-id-label" title={document.id}>ID {shortDocumentID(document.id)}</span></div></td>
           <td>v{document.latestVersion}</td>
           <td>{document.activeVersion === null ? '—' : `v${document.activeVersion}`}</td>
           <td><StatusBadge status={document.latestStatus} /></td>

@@ -46,4 +46,76 @@ describe('browser API client', () => {
 
     expect(fetchMock).toHaveBeenCalledWith('/api/v1/uploads/recovery/request%2Fkey', expect.any(Object))
   })
+
+  it('rejects a collection envelope returned by the document detail endpoint', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({
+      documents: [{ id: 'expense-policy', name: '법인카드·출장비 정산규정' }],
+      limit: 100,
+      offset: 0,
+    }), { status: 200, headers: { 'Content-Type': 'application/json' } })))
+
+    await expect(api.document('expense-policy')).rejects.toMatchObject({
+      name: 'APIError',
+      code: 'INVALID_RESPONSE',
+      status: 502,
+      retryable: true,
+    })
+  })
+
+  it('requests normalized-name guidance without treating matches as conflicts', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({
+      normalizedName: '보안 정책',
+      total: 2,
+      documents: [],
+    }), { status: 200, headers: { 'Content-Type': 'application/json' } }))
+    vi.stubGlobal('fetch', fetchMock)
+
+    await expect(api.documentNameMatches(' 보안 정책 ')).resolves.toMatchObject({
+      normalizedName: '보안 정책',
+      total: 2,
+    })
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/v1/documents/name-matches?name=%20%EB%B3%B4%EC%95%88%20%EC%A0%95%EC%B1%85%20',
+      expect.objectContaining({ credentials: 'include' }),
+    )
+  })
+
+  it('rejects a malformed normalized-name guidance response', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({
+      normalizedName: '보안 정책',
+      total: 1,
+      documents: [{
+        id: '11111111-1111-4111-8111-111111111111',
+        name: '보안 정책',
+        activeVersion: null,
+        latestStatus: 'ACTIVE',
+        updatedAt: '2026-08-25T00:00:00Z',
+      }],
+    }), { status: 200, headers: { 'Content-Type': 'application/json' } })))
+
+    await expect(api.documentNameMatches('보안 정책')).rejects.toMatchObject({
+      name: 'APIError',
+      code: 'INVALID_RESPONSE',
+      status: 502,
+      retryable: true,
+    })
+
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({
+      normalizedName: '보안 정책',
+      total: 0,
+      documents: [{
+        id: '11111111-1111-4111-8111-111111111111',
+        name: '보안 정책',
+        activeVersion: 1,
+        latestVersion: 1,
+        latestStatus: 'ACTIVE',
+        updatedAt: '2026-08-25T00:00:00Z',
+      }],
+    }), { status: 200, headers: { 'Content-Type': 'application/json' } })))
+
+    await expect(api.documentNameMatches('보안 정책')).rejects.toMatchObject({
+      name: 'APIError',
+      code: 'INVALID_RESPONSE',
+    })
+  })
 })

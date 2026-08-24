@@ -28,6 +28,12 @@ export interface DocumentListResponse {
   offset: number
 }
 
+export interface DocumentNameMatches {
+  normalizedName: string
+  total: number
+  documents: DocumentSummary[]
+}
+
 export interface DocumentVersion {
   id: string
   versionNumber: number

@@ -3,7 +3,8 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { APIError, api } from '../api/client'
 import { useAuth } from '../auth/AuthProvider'
 import { ErrorNotice } from '../components/ErrorNotice'
-import type { Preflight, UploadRecovery } from '../types'
+import { shortDocumentID } from '../documents/identity'
+import type { DocumentNameMatches, Preflight, UploadRecovery } from '../types'
 import {
   BindPreflightHash,
   ClearUploadState,
@@ -26,6 +27,7 @@ export function UploadPage() {
   const { documentID } = useParams()
   const isVersion = Boolean(documentID)
   const { session } = useAuth()
+  const hasSession = session !== null
   const navigate = useNavigate()
   const storageKey = isVersion
     ? `syncbase.upload./documents/${documentID}/versions/new`
@@ -40,6 +42,9 @@ export function UploadPage() {
   const [dragging, setDragging] = useState(false)
   const [recovery, setRecovery] = useState<UploadRecovery | null>(null)
   const [recoveryActive, setRecoveryActive] = useState(initial.state.submitted)
+  const [nameMatches, setNameMatches] = useState<DocumentNameMatches | null>(null)
+  const [checkingName, setCheckingName] = useState(false)
+  const [nameMatchError, setNameMatchError] = useState('')
 
   useEffect(() => {
     if (!recoveryActive || !initial.storage) return
@@ -75,6 +80,26 @@ export function UploadPage() {
     void recover()
     return () => { active = false; if (timer !== undefined) window.clearTimeout(timer) }
   }, [initial.storage, navigate, recoveryActive, storageKey])
+
+  useEffect(() => {
+    setNameMatches(null)
+    setNameMatchError('')
+    setCheckingName(false)
+    if (isVersion || !hasSession || !validDocumentName(name)) return
+
+    let active = true
+    const timer = window.setTimeout(() => {
+      setCheckingName(true)
+      void api.documentNameMatches(name).then((matches) => {
+        if (active) setNameMatches(matches)
+      }).catch(() => {
+        if (active) setNameMatchError('같은 이름의 기존 문서를 확인하지 못했습니다. 등록은 계속할 수 있습니다.')
+      }).finally(() => {
+        if (active) setCheckingName(false)
+      })
+    }, 350)
+    return () => { active = false; window.clearTimeout(timer) }
+  }, [hasSession, isVersion, name])
 
   const fingerprint = useMemo(() => file ? `${file.name}:${file.size}:${file.lastModified}` : '', [file])
 
@@ -154,9 +179,41 @@ export function UploadPage() {
         <ul className="requirements"><li>PDF, 최대 100MB, 최대 500페이지</li><li>파일 검사와 SHA-256은 서버가 최종 판단합니다.</li><li>등록 후 응답이 유실되어도 복구 코드로 승인 결과를 확인합니다.</li></ul>
         {preflight && <dl className="preflight"><div><dt>파일</dt><dd>{preflight.fileName}</dd></div><div><dt>크기</dt><dd>{formatBytes(preflight.byteSize)}</dd></div><div><dt>페이지</dt><dd>{preflight.pageCount}페이지</dd></div><div><dt>SHA-256</dt><dd><code>{preflight.sha256}</code></dd></div></dl>}
       </section>
-      <aside className="panel upload-sidebar"><h2>2. 등록 정보</h2>{!isVersion && <label><span>문서명</span><input value={name} maxLength={200} onChange={(event) => setName(event.target.value)} required /></label>}<div className="request-key"><span>복구 코드</span><code>{state.current.requestKey}</code>{fingerprint && <small>브라우저 지문: {fingerprint}</small>}</div><button className="button primary full" type="submit" disabled={busy || !preflight || !initial.storage || (!isVersion && !validDocumentName(name)) || recovery?.status === 'conflict' || recovery?.status === 'pending'}>{busy || recovery?.status === 'pending' ? '서버와 상태를 확인 중…' : isVersion ? '새 버전 등록' : '문서 등록'}</button></aside>
+      <aside className="panel upload-sidebar">
+        <h2>2. 등록 정보</h2>
+        {!isVersion && <label><span>문서명</span><input value={name} maxLength={200} onChange={(event) => setName(event.target.value)} required /></label>}
+        {!isVersion && <NameGuidance checking={checkingName} error={nameMatchError} matches={nameMatches} />}
+        <div className="request-key"><span>복구 코드</span><code>{state.current.requestKey}</code>{fingerprint && <small>브라우저 지문: {fingerprint}</small>}</div>
+        <button className="button primary full" type="submit" disabled={busy || !preflight || !initial.storage || (!isVersion && !validDocumentName(name)) || recovery?.status === 'conflict' || recovery?.status === 'pending'}>{busy || recovery?.status === 'pending' ? '서버와 상태를 확인 중…' : isVersion ? '새 버전 등록' : '문서 등록'}</button>
+      </aside>
     </form>
   </div>
+}
+
+function NameGuidance({
+  checking,
+  error,
+  matches,
+}: {
+  checking: boolean
+  error: string
+  matches: DocumentNameMatches | null
+}) {
+  if (checking) return <p className="field-status" role="status">같은 이름의 문서를 확인하고 있습니다.</p>
+  if (error) return <p className="field-status warning" role="status">{error}</p>
+  if (!matches || matches.total === 0) return null
+  return (
+    <div className="name-guidance" role="status">
+      <strong>같은 이름의 문서가 {matches.total}개 있습니다.</strong>
+      <p>새 문서로 별도 등록할 수 있습니다. 같은 문서의 개정본이라면 기존 문서에 새 버전을 등록하세요.</p>
+      <ul>{matches.documents.map((document) => <li key={document.id}>
+        <Link to={`/documents/${document.id}/versions/new`} title={document.id}>
+          ID {shortDocumentID(document.id)} · 최신 v{document.latestVersion}에 새 버전 등록
+        </Link>
+      </li>)}</ul>
+      {matches.total > matches.documents.length && <small>그 밖에 {matches.total - matches.documents.length}개의 같은 이름 문서가 있습니다.</small>}
+    </div>
+  )
 }
 
 function validateFile(file: File): string | null {

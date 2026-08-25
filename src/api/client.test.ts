@@ -32,6 +32,113 @@ describe('browser API client', () => {
     })
   })
 
+  it('rejects an insufficient-evidence response that leaks a search hit', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({
+      query: '검증 질문',
+      grounding_status: 'INSUFFICIENT_EVIDENCE',
+      grounding_reason: 'NO_HITS_ABOVE_POLICY',
+      results: [{ rank: 1, snippet: '이 근거는 노출되면 안 됩니다.' }],
+    }), { status: 200, headers: { 'Content-Type': 'application/json' } })))
+
+    await expect(api.search('검증 질문')).rejects.toMatchObject({
+      name: 'APIError', code: 'INVALID_RESPONSE', status: 502, retryable: true,
+    })
+  })
+
+  it('normalizes a valid legacy search response during a rolling deployment', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({
+      query: '검증 질문',
+      results: [{
+        rank: 1,
+        score: 0.91,
+        document_id: '11111111-1111-4111-8111-111111111111',
+        document_name: '보안 정책',
+        version_id: '22222222-2222-4222-8222-222222222222',
+        document_version: 2,
+        page_number: 3,
+        snippet: '활성 버전의 검증 가능한 근거',
+        source_url: '/sources/11111111-1111-4111-8111-111111111111/versions/2?page=3',
+      }],
+    }), { status: 200, headers: { 'Content-Type': 'application/json' } })))
+
+    await expect(api.search('검증 질문')).resolves.toMatchObject({
+      grounding_status: 'SUPPORTED',
+      grounding_reason: null,
+      results: [{ document_version: 2, page_number: 3 }],
+    })
+  })
+
+  it('preserves every hit field in the current supported contract', async () => {
+    const response = {
+      query: '검증 질문',
+      grounding_status: 'SUPPORTED',
+      grounding_reason: null,
+      results: [{
+        rank: 1,
+        score: 0.91,
+        document_id: '11111111-1111-4111-8111-111111111111',
+        document_name: '보안 정책',
+        version_id: '22222222-2222-4222-8222-222222222222',
+        document_version: 2,
+        page_number: 3,
+        snippet: '활성 버전의 검증 가능한 근거',
+        source_url: '/sources/11111111-1111-4111-8111-111111111111/versions/2?page=3',
+      }],
+    }
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify(response), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    })))
+
+    await expect(api.search('검증 질문')).resolves.toEqual(response)
+  })
+
+  it('normalizes a legacy empty search response without inventing evidence', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({
+      query: '없는 질문',
+      results: [],
+    }), { status: 200, headers: { 'Content-Type': 'application/json' } })))
+
+    await expect(api.search('없는 질문')).resolves.toEqual({
+      query: '없는 질문',
+      grounding_status: 'INSUFFICIENT_EVIDENCE',
+      grounding_reason: 'NO_HITS_ABOVE_POLICY',
+      results: [],
+    })
+  })
+
+  it('rejects a partially upgraded grounding response', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({
+      query: '검증 질문',
+      grounding_status: 'SUPPORTED',
+      results: [],
+    }), { status: 200, headers: { 'Content-Type': 'application/json' } })))
+
+    await expect(api.search('검증 질문')).rejects.toMatchObject({
+      name: 'APIError', code: 'INVALID_RESPONSE', status: 502, retryable: true,
+    })
+  })
+
+  it.each([
+    'NO_HITS_ABOVE_POLICY',
+    'ONLY_INACTIVE_VERSION_MATCHED',
+    'SOURCE_UNAVAILABLE',
+  ] as const)('accepts the current empty-evidence contract for %s', async (reason) => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({
+      query: '검증 질문',
+      grounding_status: 'INSUFFICIENT_EVIDENCE',
+      grounding_reason: reason,
+      results: [],
+    }), { status: 200, headers: { 'Content-Type': 'application/json' } })))
+
+    await expect(api.search('검증 질문')).resolves.toEqual({
+      query: '검증 질문',
+      grounding_status: 'INSUFFICIENT_EVIDENCE',
+      grounding_reason: reason,
+      results: [],
+    })
+  })
+
   it('keeps PDF requests under the authenticated API boundary', () => {
     expect(api.rawPDFURL('doc/one', 3)).toBe('/api/v1/documents/doc%2Fone/versions/3/raw.pdf')
   })

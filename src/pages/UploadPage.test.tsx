@@ -1,4 +1,4 @@
-import { cleanup, render, screen, waitFor } from '@testing-library/react'
+import { act, cleanup, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
@@ -125,5 +125,109 @@ describe('registration recovery notice semantics', () => {
     ['not_committed', 'neutral'],
   ] as const)('maps %s to the %s visual state', (status, tone) => {
     expect(recoveryNoticeTone(status)).toBe(tone)
+  })
+})
+
+describe('registration recovery', () => {
+  it('keeps not_committed non-terminal after refresh while the persisted POST window is still open', async () => {
+    vi.mocked(api.preflight).mockResolvedValue({
+      fileName: 'policy-a.pdf', byteSize: 8, pageCount: 1,
+      sha256: 'sha256-policy-a', suggestedName: '정책 A',
+    })
+    vi.mocked(api.documentNameMatches).mockResolvedValue({
+      normalizedName: '정책 A', total: 0, documents: [],
+    })
+    vi.mocked(api.recovery).mockResolvedValue({ status: 'not_committed' })
+    vi.mocked(api.registerDocument).mockImplementation(() => new Promise(() => undefined))
+    const user = userEvent.setup()
+    const route = (
+      <MemoryRouter initialEntries={['/documents/new']}>
+        <Routes>
+          <Route path="/documents/new" element={<UploadPage />} />
+        </Routes>
+      </MemoryRouter>
+    )
+
+    const firstPage = render(route)
+    await user.upload(screen.getByLabelText('파일 선택'), new File(['%PDF-1.7'], 'policy-a.pdf', { type: 'application/pdf' }))
+    await user.click(await screen.findByRole('button', { name: '문서 등록' }))
+    await waitFor(() => expect(api.recovery).toHaveBeenCalledTimes(1))
+    firstPage.unmount()
+
+    render(route)
+    await waitFor(() => expect(api.recovery).toHaveBeenCalledTimes(2))
+    expect(screen.queryByRole('button', { name: '새 등록 시작' })).not.toBeInTheDocument()
+    expect(screen.getByText(/등록 승인 결과를 확인하고 있습니다/)).toBeInTheDocument()
+  })
+
+  it('can rotate the recovery key after submit, early not_committed, timeout, refresh, and a different PDF', async () => {
+    let rejectRegistration: (reason: Error) => void = () => undefined
+    vi.mocked(api.preflight)
+      .mockResolvedValueOnce({
+        fileName: 'policy-a.pdf', byteSize: 8, pageCount: 1,
+        sha256: 'sha256-policy-a', suggestedName: '정책 A',
+      })
+      .mockResolvedValueOnce({
+        fileName: 'policy-b.pdf', byteSize: 8, pageCount: 1,
+        sha256: 'sha256-policy-b', suggestedName: '정책 B',
+      })
+    vi.mocked(api.documentNameMatches).mockResolvedValue({
+      normalizedName: '정책', total: 0, documents: [],
+    })
+    vi.mocked(api.recovery).mockResolvedValue({ status: 'not_committed' })
+    vi.mocked(api.registerDocument)
+      .mockImplementationOnce(() => new Promise((_, reject) => {
+        rejectRegistration = reject
+      }))
+      .mockResolvedValueOnce({
+        documentId: '11111111-1111-4111-8111-111111111111',
+        versionId: '22222222-2222-4222-8222-222222222222',
+        version: 1,
+        runId: '33333333-3333-4333-8333-333333333333',
+        status: 'QUEUED',
+        recovered: false,
+        documentUrl: '/documents/11111111-1111-4111-8111-111111111111',
+        sourceViewerUrl: '/sources/11111111-1111-4111-8111-111111111111/versions/1?page=1',
+      })
+    const user = userEvent.setup()
+    const route = (
+      <MemoryRouter initialEntries={['/documents/new']}>
+        <Routes>
+          <Route path="/documents/new" element={<UploadPage />} />
+          <Route path="/documents/:documentID" element={<div>문서 상세</div>} />
+        </Routes>
+      </MemoryRouter>
+    )
+    const firstPage = render(route)
+    const firstPDF = new File(['%PDF-1.7'], 'policy-a.pdf', { type: 'application/pdf' })
+
+    await user.upload(screen.getByLabelText('파일 선택'), firstPDF)
+    await user.click(await screen.findByRole('button', { name: '문서 등록' }))
+    await waitFor(() => expect(api.recovery).toHaveBeenCalledTimes(1))
+    const firstRequestKey = vi.mocked(api.registerDocument).mock.calls[0][2]
+    expect(screen.queryByRole('button', { name: '새 등록 시작' })).not.toBeInTheDocument()
+
+    await act(async () => rejectRegistration(new Error('gateway timeout')))
+    expect(await screen.findByText(/gateway timeout/)).toBeInTheDocument()
+    expect(screen.getByText(/서버의 등록 상태를 다시 확인하고 있습니다/)).toBeInTheDocument()
+    firstPage.unmount()
+
+    render(route)
+    expect(await screen.findByText(/아직 승인된 등록이 없습니다/)).toBeInTheDocument()
+    expect(screen.queryByText(/서버의 등록 상태를 다시 확인하고 있습니다/)).not.toBeInTheDocument()
+    const startOver = await screen.findByRole('button', { name: '새 등록 시작' })
+    await user.click(startOver)
+
+    const secondPDF = new File(['%PDF-1.7'], 'policy-b.pdf', { type: 'application/pdf' })
+    await user.upload(screen.getByLabelText('파일 선택'), secondPDF)
+
+    expect((await screen.findAllByText('policy-b.pdf')).length).toBeGreaterThan(0)
+    expect(screen.queryByText(/다른 PDF에 이미 사용/)).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: '문서 등록' }))
+    await waitFor(() => expect(api.registerDocument).toHaveBeenCalledTimes(2))
+    const [submittedPDF, , secondRequestKey] = vi.mocked(api.registerDocument).mock.calls[1]
+    expect(submittedPDF).toBe(secondPDF)
+    expect(secondRequestKey).not.toBe(firstRequestKey)
+    expect(await screen.findByText('문서 상세')).toBeInTheDocument()
   })
 })

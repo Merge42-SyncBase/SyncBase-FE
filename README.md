@@ -1,4 +1,13 @@
-# SyncBase Frontend
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="public/brand/syncbase-logo-horizontal-inverse.svg">
+    <img src="public/brand/syncbase-logo-horizontal.svg" alt="SyncBase" width="360">
+  </picture>
+</p>
+
+<h1 align="center">SyncBase Frontend</h1>
+
+<p align="center">정합성 우선 AI 문서 관리·벡터 검색</p>
 
 React 기반 운영 콘솔입니다. 브라우저 메모리 mock을 사용하지 않으며, same-origin
 `/api/v1`을 통해 Go WAS에만 연결합니다. PostgreSQL 접근 권한, MCP 토큰, 임베딩 모델은

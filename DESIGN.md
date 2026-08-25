@@ -157,6 +157,16 @@ Hierarchy is structural. Flat bordered surfaces, neutral tonal shifts, and preci
 - Flat bordered surfaces with restrained 4–7px corners.
 - Desktop evidence adjacency and a linear search → results → source mobile flow.
 
+## Brand Identity
+
+**Logo concept: “Evidence Seam · 근거의 이음선”**
+
+The SyncBase mark is built from two authoritative record fields separated by a continuous S-shaped seam. The cobalt upper field represents the ACTIVE record a user can act on; the deep-navy lower field represents the controlled data base where document identity, metadata, and vectors stay aligned. The seam carries the traceability idea without an added status node, keeping the identity to two colors and one decisive gesture.
+
+Use `public/brand/syncbase-mark.svg` on light surfaces and `public/brand/syncbase-mark-inverse.svg` on the deep-navy role rail and login perimeter. Use the monochrome variants when a process requires one-color reproduction. The mark must remain flat and front-on: no database cylinders, circular sync arrows, gradients, folds, bevels, enclosing app-icon tiles, status dots, or decorative motion loops. At least one eighth of the mark width remains clear on every side. The primary mark starts at 16px; the horizontal lockup starts at 112px.
+
+The full rationale, asset inventory, print note, and generation provenance live in `docs/brand/README.md`.
+
 ## Colors
 
 The palette is a cool institutional ledger: near-black navy provides authority, cobalt marks intent, status colors carry literal operational meaning, and blue-gray neutrals keep evidence readable without visual noise.

@@ -33,3 +33,10 @@ docker build -t syncbase/web:local .
 - 문서명은 중복을 허용하되 등록 전에 같은 정규화 이름을 안내하며, 목록은 UUID의 짧은 표기를 함께 보여 구분합니다.
 - 검색은 WAS가 MCP `search_documents`를 호출한 결과만 표시합니다.
 - 원문 화면은 PDF.js canvas와 text layer로 정확한 document/version/page를 렌더링합니다.
+
+## License
+
+SyncBase Frontend의 자체 소스는 [Apache License 2.0](LICENSE)
+(`Apache-2.0`)으로 배포합니다.
+PDF.js를 포함한 외부 구성요소의 라이선스와 출처는
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)에 구분하여 기록합니다.

@@ -1,12 +1,13 @@
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthProvider'
+import { isDocumentAdmin, landingPathForRole } from '../auth/roles'
 
 export function AppShell() {
   const { session, logout } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
-  const isDocumentAdmin = session?.user.role === 'DOCUMENT_ADMIN'
-  const roleLabel = isDocumentAdmin ? '문서 운영 관리자' : '일반 팀원'
+  const documentAdmin = isDocumentAdmin(session?.user.role ?? '')
+  const roleLabel = documentAdmin ? '문서 운영 관리자' : '일반 팀원'
   const searchWorkspace = location.pathname === '/search'
 
   async function handleLogout() {
@@ -18,13 +19,13 @@ export function AppShell() {
     <div className="app-shell">
       <a className="skip-link" href="#main-content">본문으로 건너뛰기</a>
       <aside className="sidebar">
-        <NavLink className="brand" to={isDocumentAdmin ? '/documents' : '/search'}>
+        <NavLink className="brand" to={landingPathForRole(session?.user.role ?? '')}>
           <span className="brand-mark" aria-hidden="true">S</span>
           <span><strong>SyncBase</strong><small>{roleLabel}</small></span>
         </NavLink>
         <nav aria-label="주 메뉴">
           <NavLink to="/search"><SearchIcon />근거 검색</NavLink>
-          {isDocumentAdmin && <NavLink to="/documents"><DocumentIcon />문서 운영</NavLink>}
+          {documentAdmin && <NavLink to="/documents"><DocumentIcon />문서 운영</NavLink>}
         </nav>
         <div className="sidebar-footer">
           <span className="role-name">{roleLabel}</span>
@@ -33,7 +34,7 @@ export function AppShell() {
         </div>
       </aside>
       <section className={`workspace${searchWorkspace ? ' workspace-evidence' : ''}`}>
-        <main id="main-content"><Outlet /></main>
+        <main id="main-content" tabIndex={-1}><Outlet /></main>
       </section>
     </div>
   )

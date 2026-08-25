@@ -99,8 +99,17 @@ export interface SearchResult {
   source_url: string
 }
 
+export type GroundingStatus = 'SUPPORTED' | 'INSUFFICIENT_EVIDENCE'
+
+export type GroundingReason =
+  | 'NO_HITS_ABOVE_POLICY'
+  | 'ONLY_INACTIVE_VERSION_MATCHED'
+  | 'SOURCE_UNAVAILABLE'
+
 export interface SearchResponse {
   query: string
+  grounding_status: GroundingStatus
+  grounding_reason: GroundingReason | null
   results: SearchResult[]
 }
 

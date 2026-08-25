@@ -2,6 +2,7 @@ import { FormEvent, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { APIError } from '../api/client'
 import { useAuth } from '../auth/AuthProvider'
+import { landingPathForRole } from '../auth/roles'
 import { ErrorNotice } from '../components/ErrorNotice'
 
 export function LoginPage() {
@@ -13,15 +14,13 @@ export function LoginPage() {
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
-  const destination = safeDestination(searchParams.get('next'))
-
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setError('')
     setSubmitting(true)
     try {
-      await login(username, password)
-      navigate(destination, { replace: true })
+      const nextSession = await login(username, password)
+      navigate(safeDestination(searchParams.get('next'), landingPathForRole(nextSession.user.role)), { replace: true })
     } catch (reason) {
       setError(reason instanceof APIError ? reason.message : '로그인 요청을 완료하지 못했습니다.')
     } finally {
@@ -31,31 +30,43 @@ export function LoginPage() {
 
   return (
     <main className="login-page">
-      <section className="login-card" aria-labelledby="login-title">
-        <div className="login-brand"><span className="brand-mark" aria-hidden="true">S</span><strong>SyncBase</strong></div>
-        <p className="eyebrow">Administrator access</p>
-        <h1 id="login-title">문서 운영 콘솔</h1>
-        <p className="muted">PDF를 등록하고, 실제 처리 상태와 검색 근거를 확인합니다.</p>
-        {error && <ErrorNotice>{error}</ErrorNotice>}
-        <form className="form-stack" onSubmit={(event) => void submit(event)}>
-          <label>
-            <span>관리자 ID</span>
-            <input autoComplete="username" value={username} onChange={(event) => setUsername(event.target.value)} required />
-          </label>
-          <label>
-            <span>비밀번호</span>
-            <input autoComplete="current-password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} required />
-          </label>
-          <button className="button primary" type="submit" disabled={submitting}>
-            {submitting ? '로그인 중…' : '로그인'}
-          </button>
-        </form>
-      </section>
+      <div className="login-shell">
+        <section className="login-intro" aria-labelledby="login-promise">
+          <div className="login-brand"><span className="brand-mark" aria-hidden="true">S</span><strong>SyncBase</strong></div>
+          <div className="login-promise">
+            <h1 id="login-promise">조직 지식을<br />근거까지 연결합니다.</h1>
+            <p>질문에서 신뢰할 수 있는 결과를 찾고, 정확한 Document·Version·원문 페이지에서 직접 검증하세요.</p>
+          </div>
+          <ul className="login-principles" aria-label="SyncBase 운영 원칙">
+            <li><strong>ACTIVE Version</strong><span>현재 공개된 근거만 검색</span></li>
+            <li><strong>원문 추적</strong><span>Document·Version·페이지로 검증</span></li>
+            <li><strong>조직 내부 운영</strong><span>로컬 임베딩과 재현 가능한 구성</span></li>
+          </ul>
+        </section>
+        <section className="login-card" aria-labelledby="login-title">
+          <h2 id="login-title">SyncBase 로그인</h2>
+          <p className="muted">하나의 계정으로 근거 검색과 권한에 따른 문서 운영 기능을 사용합니다.</p>
+          {error && <ErrorNotice>{error}</ErrorNotice>}
+          <form className="form-stack" onSubmit={(event) => void submit(event)}>
+            <label>
+              <span>사용자 ID</span>
+              <input autoComplete="username" value={username} onChange={(event) => setUsername(event.target.value)} required />
+            </label>
+            <label>
+              <span>비밀번호</span>
+              <input autoComplete="current-password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} required />
+            </label>
+            <button className="button primary" type="submit" disabled={submitting}>
+              {submitting ? '로그인 중…' : '로그인'}
+            </button>
+          </form>
+        </section>
+      </div>
     </main>
   )
 }
 
-function safeDestination(value: string | null): string {
-  if (!value || !value.startsWith('/') || value.startsWith('//') || value.includes('\\')) return '/documents'
+function safeDestination(value: string | null, fallback: string): string {
+  if (!value || !value.startsWith('/') || value.startsWith('//') || value.includes('\\')) return fallback
   return value
 }

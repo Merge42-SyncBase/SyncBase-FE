@@ -52,11 +52,11 @@ export function DocumentDetailPage() {
 
   return (
     <div className="page-stack">
-      <header className="page-header split"><div><Link className="back-link" to="/documents">← 문서 목록</Link><p className="eyebrow">Document detail</p><h1>{document.name}</h1><p className="muted">최신 버전이 활성화되기 전까지 이전 ACTIVE 버전만 검색됩니다.</p></div><Link className="button primary" to={`/documents/${document.id}/versions/new`}>새 버전 등록</Link></header>
+      <header className="page-header split"><div><Link className="back-link" to="/documents">← 문서 운영 현황</Link><h1>{document.name}</h1><p className="muted">새 Version이 ACTIVE가 되기 전까지 기존 ACTIVE Version만 검색됩니다.</p></div><Link className="button primary" to={`/documents/${document.id}/versions/new`}>새 Version 등록</Link></header>
       {error && <ErrorNotice>{error}</ErrorNotice>}
-      {active && <div className="notice success">현재 검색에 노출된 버전은 <strong>v{active.versionNumber}</strong>입니다. <Link to={`/sources/${document.id}/versions/${active.versionNumber}?page=1`}>원문 열기</Link></div>}
-      <section className="page-stack">{document.versions.map((version) => <article className="panel version-card" key={version.id}>
-        <div className="panel-header split"><div><div className="version-title"><h2>v{version.versionNumber}</h2><StatusBadge status={version.status} />{version.active && <span className="active-chip">현재 검색 버전</span>}</div><p>{formatDate(version.updatedAt)} · {version.pageCount ? `${version.pageCount}페이지` : '페이지 확인 중'}</p></div><div className="version-actions">{version.pageCount > 0 && <Link className="button secondary" to={`/sources/${document.id}/versions/${version.versionNumber}?page=1`}>원문 확인</Link>}{version.manualRetryAllowed && <button className="button secondary" disabled={retrying === version.runId} onClick={() => void retry(version)}>{retrying === version.runId ? '재시도 요청 중…' : '처리 재시도'}</button>}</div></div>
+      {active && <div className="notice success">현재 검색에 노출된 버전은 <strong>v{active.versionNumber}</strong>입니다. <Link to={`/sources/${document.id}/versions/${active.versionNumber}?page=1`} state={{ returnTo: `/documents/${document.id}` }}>원문 열기</Link></div>}
+      <section className="version-ledger" aria-label="Version 처리 현황">{document.versions.map((version) => <article className="version-record" key={version.id}>
+        <div className="panel-header split"><div><div className="version-title"><h2>v{version.versionNumber}</h2><StatusBadge status={version.status} />{version.active && <span className="active-chip">현재 검색 Version</span>}</div><p>{formatDate(version.updatedAt)} · {version.pageCount ? `${version.pageCount}페이지` : '페이지 확인 중'}</p></div><div className="version-actions">{version.pageCount > 0 && <Link className="button secondary" to={`/sources/${document.id}/versions/${version.versionNumber}?page=1`} state={{ returnTo: `/documents/${document.id}` }}>원문 확인</Link>}{version.manualRetryAllowed && <button className="button secondary" disabled={retrying === version.runId} onClick={() => void retry(version)}>{retrying === version.runId ? '재시도 요청 중…' : '처리 재시도'}</button>}</div></div>
         <Pipeline version={version} />
         {version.errorCode && <div className="notice error">{errorLabel(version.errorCode)} <code>{version.errorCode}</code></div>}
         <dl className="metadata"><div><dt>처리 작업</dt><dd><code>{version.runId}</code></dd></div><div><dt>상관 ID</dt><dd><code>{version.correlationId}</code></dd></div><div><dt>자동 시도</dt><dd>{version.automaticAttempts} / 3{version.queuePosition ? ` · 대기 ${version.queuePosition}번` : ''}</dd></div></dl>
@@ -67,9 +67,10 @@ export function DocumentDetailPage() {
 
 function Pipeline({ version }: { version: DocumentVersion }) {
   const current = stages.indexOf(version.stage)
-  return <ol className="pipeline">{stages.map((stage, index) => {
+  return <ol className="pipeline" aria-label={`v${version.versionNumber} 처리 단계`}>{stages.map((stage, index) => {
     const state = version.status === 'FAILED' && index === current ? 'failed' : index < current || ['ACTIVE', 'SUPERSEDED'].includes(version.status) ? 'complete' : index === current && version.status === 'PROCESSING' ? 'current' : 'pending'
-    return <li className={state} key={stage}><span aria-hidden="true">{state === 'complete' ? '✓' : state === 'failed' ? '!' : index + 1}</span><strong>{stageLabels[stage]}</strong></li>
+    const stateLabel = ({ complete: '완료', current: '진행 중', failed: '실패', pending: '대기' } as const)[state]
+    return <li className={state} aria-current={state === 'current' ? 'step' : undefined} key={stage}><span aria-hidden="true">{index + 1}</span><strong>{stageLabels[stage]}</strong><span className="sr-only">{stateLabel}</span></li>
   })}</ol>
 }
 

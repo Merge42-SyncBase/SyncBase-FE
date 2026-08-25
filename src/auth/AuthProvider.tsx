@@ -5,7 +5,7 @@ import type { Session } from '../types'
 interface AuthContextValue {
   session: Session | null
   loading: boolean
-  login(username: string, password: string): Promise<void>
+  login(username: string, password: string): Promise<Session>
   logout(): Promise<void>
   refresh(): Promise<void>
 }
@@ -34,6 +34,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const login = useCallback(async (username: string, password: string) => {
     const next = await api.login(username, password)
     setSession(next)
+    return next
   }, [])
 
   const logout = useCallback(async () => {

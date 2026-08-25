@@ -21,7 +21,7 @@ export function AppShell() {
       <a className="skip-link" href="#main-content">본문으로 건너뛰기</a>
       <aside className="sidebar">
         <NavLink className="brand" to={landingPathForRole(session?.user.role ?? '')}>
-          <span className="brand-mark" aria-hidden="true">S</span>
+          <img className="brand-mark" src="/brand/syncbase-mark-inverse.svg" alt="" aria-hidden="true" />
           <span><strong>SyncBase</strong><small>{roleLabel}</small></span>
         </NavLink>
         <nav aria-label="주 메뉴">

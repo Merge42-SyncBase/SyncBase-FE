@@ -32,7 +32,7 @@ export function LoginPage() {
     <main className="login-page">
       <div className="login-shell">
         <section className="login-intro" aria-labelledby="login-promise">
-          <div className="login-brand"><span className="brand-mark" aria-hidden="true">S</span><strong>SyncBase</strong></div>
+          <div className="login-brand"><img className="brand-mark" src="/brand/syncbase-mark-inverse.svg" alt="" aria-hidden="true" /><strong>SyncBase</strong></div>
           <div className="login-promise">
             <h1 id="login-promise">조직 지식을<br />근거까지 연결합니다.</h1>
             <p>질문에서 신뢰할 수 있는 결과를 찾고, 정확한 Document·Version·원문 페이지에서 직접 검증하세요.</p>

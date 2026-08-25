@@ -150,14 +150,9 @@ code {
 .brand-mark {
   width: 32px;
   height: 32px;
-  display: inline-grid;
+  display: block;
   flex: 0 0 auto;
-  place-items: center;
-  color: #fff;
-  background: #315ed9;
-  border-radius: 7px;
-  box-shadow: 0 5px 14px #07101f66;
-  font-weight: 800;
+  filter: drop-shadow(0 5px 7px #07101f66);
 }
 
 .login-brand .brand-mark {

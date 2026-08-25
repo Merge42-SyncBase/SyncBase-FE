@@ -40,18 +40,21 @@ export function DocumentsPage() {
   return (
     <div className="page-stack">
       <header className="page-header split">
-        <div><p className="eyebrow">Knowledge library</p><h1>문서</h1><p className="muted">등록된 PDF의 처리 상태와 검색 공개 버전을 확인합니다.</p></div>
+        <div><h1>문서 운영 현황</h1><p className="muted">등록된 Document의 처리 상태와 현재 검색에 공개된 ACTIVE Version을 확인합니다.</p></div>
         <Link className="button primary" to="/documents/new">PDF 등록</Link>
       </header>
-      <section className="metrics" aria-label="문서 상태 요약">
-        <Metric label="전체 문서" value={documents.length} />
-        <Metric label="검색 가능" value={searchable} tone="good" />
-        <Metric label="처리 중" value={processing} tone="pending" />
-        <Metric label="확인 필요" value={attention} tone="danger" />
+      <section className="operations-summary" aria-labelledby="operations-summary-title">
+        <header><h2 id="operations-summary-title">현재 상태</h2><p>5초마다 처리 상태를 갱신합니다.</p></header>
+        <dl className="metrics">
+          <Metric label="전체 Document" value={documents.length} />
+          <Metric label="검색 가능" value={searchable} tone="good" />
+          <Metric label="처리 중" value={processing} tone="pending" />
+          <Metric label="확인 필요" value={attention} tone="danger" />
+        </dl>
       </section>
       {error && <ErrorNotice>{error}</ErrorNotice>}
-      <section className="panel">
-        <div className="panel-header split"><div><h2>문서 라이브러리</h2><p>5초마다 실제 처리 상태를 갱신합니다.</p></div><label className="filter"><span className="sr-only">문서명 필터</span><input placeholder="문서명 검색" value={filter} onChange={(event) => setFilter(event.target.value)} /></label></div>
+      <section className="panel documents-panel">
+        <div className="panel-header split"><div><h2>Document 목록</h2><p>동일한 표시 이름은 Document ID로 구분합니다.</p></div><label className="filter"><span className="sr-only">문서명 필터</span><input placeholder="문서명 검색" value={filter} onChange={(event) => setFilter(event.target.value)} /></label></div>
         {loading ? <div className="skeleton-list" aria-live="polite">문서를 불러오는 중입니다.</div> : visible.length === 0 ? (
           <div className="empty-state"><strong>표시할 문서가 없습니다.</strong><p>PDF를 등록하면 처리 현황이 이곳에 표시됩니다.</p></div>
         ) : <DocumentTable documents={visible} />}
@@ -61,7 +64,7 @@ export function DocumentsPage() {
 }
 
 function Metric({ label, value, tone = '' }: { label: string; value: number; tone?: string }) {
-  return <article className={`metric ${tone}`}><span>{label}</span><strong>{value}</strong></article>
+  return <div className={`metric ${tone}`}><dt>{label}</dt><dd>{value}</dd></div>
 }
 
 function DocumentTable({ documents }: { documents: DocumentSummary[] }) {

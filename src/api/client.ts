@@ -4,10 +4,10 @@ import type {
   DocumentListResponse,
   DocumentNameMatches,
   DocumentSummary,
-  GroundingReason,
   Preflight,
   Registration,
   SearchResponse,
+  SearchResult,
   Session,
   Source,
   UploadRecovery,
@@ -67,73 +67,6 @@ function parseDocumentDetails(payload: unknown): DocumentDetails {
   return payload as DocumentDetails
 }
 
-const groundingReasons: readonly GroundingReason[] = [
-  'NO_HITS_ABOVE_POLICY',
-  'ONLY_INACTIVE_VERSION_MATCHED',
-  'SOURCE_UNAVAILABLE',
-]
-
-function invalidResponse(message: string): APIError {
-  return new APIError(502, {
-    error: { code: 'INVALID_RESPONSE', message, retryable: true },
-  })
-}
-
-function parseSearchResponse(payload: unknown): SearchResponse {
-  if (typeof payload !== 'object' || payload === null) {
-    throw invalidResponse('검색 응답 형식이 올바르지 않습니다.')
-  }
-  const value = payload as Record<string, unknown>
-  if (typeof value.query !== 'string' || !Array.isArray(value.results)) {
-    throw invalidResponse('검색 응답 형식이 올바르지 않습니다.')
-  }
-  const malformedHit = value.results.some((candidate) => {
-    if (typeof candidate !== 'object' || candidate === null) return true
-    const hit = candidate as Record<string, unknown>
-    return !(
-      typeof hit.rank === 'number' && Number.isInteger(hit.rank) && hit.rank >= 1 &&
-      typeof hit.score === 'number' && Number.isFinite(hit.score) && hit.score >= 0 && hit.score <= 1 &&
-      typeof hit.document_id === 'string' && typeof hit.document_name === 'string' &&
-      typeof hit.version_id === 'string' &&
-      typeof hit.document_version === 'number' && Number.isInteger(hit.document_version) && hit.document_version >= 1 &&
-      typeof hit.page_number === 'number' && Number.isInteger(hit.page_number) && hit.page_number >= 1 &&
-      typeof hit.snippet === 'string' && typeof hit.source_url === 'string'
-    )
-  })
-  if (malformedHit) throw invalidResponse('검색 근거 응답 형식이 올바르지 않습니다.')
-
-  const hasGroundingStatus = Object.prototype.hasOwnProperty.call(value, 'grounding_status')
-  const hasGroundingReason = Object.prototype.hasOwnProperty.call(value, 'grounding_reason')
-  if (!hasGroundingStatus && !hasGroundingReason) {
-    return {
-      query: value.query,
-      grounding_status: value.results.length > 0 ? 'SUPPORTED' : 'INSUFFICIENT_EVIDENCE',
-      grounding_reason: value.results.length > 0 ? null : 'NO_HITS_ABOVE_POLICY',
-      results: value.results,
-    } as SearchResponse
-  }
-  if (hasGroundingStatus !== hasGroundingReason) {
-    throw invalidResponse('검색 근거 상태를 확인할 수 없습니다.')
-  }
-
-  if (value.grounding_status === 'SUPPORTED') {
-    if (value.grounding_reason !== null || value.results.length === 0) {
-      throw invalidResponse('검색 근거 상태와 결과가 일치하지 않습니다.')
-    }
-  } else if (value.grounding_status === 'INSUFFICIENT_EVIDENCE') {
-    if (
-      typeof value.grounding_reason !== 'string' ||
-      !groundingReasons.includes(value.grounding_reason as GroundingReason) ||
-      value.results.length !== 0
-    ) {
-      throw invalidResponse('검색 근거 상태와 결과가 일치하지 않습니다.')
-    }
-  } else {
-    throw invalidResponse('검색 근거 상태를 확인할 수 없습니다.')
-  }
-  return payload as SearchResponse
-}
-
 function parseDocumentNameMatches(payload: unknown): DocumentNameMatches {
   const value = payload as Record<string, unknown> | null
   if (
@@ -153,6 +86,133 @@ function parseDocumentNameMatches(payload: unknown): DocumentNameMatches {
     })
   }
   return payload as DocumentNameMatches
+}
+
+function invalidResponse(message: string): APIError {
+  return new APIError(502, {
+    error: {
+      code: 'INVALID_RESPONSE',
+      message,
+      retryable: true,
+    },
+  })
+}
+
+function isPositiveInteger(value: unknown): value is number {
+  return typeof value === 'number' && Number.isInteger(value) && value >= 1
+}
+
+function searchResultSourcePath(documentID: string, version: number, page: number): string {
+  return `/sources/${encodeURIComponent(documentID)}/versions/${version}?page=${page}`
+}
+
+function normalizedSourcePath(value: unknown, expectedPath: string): string | null {
+  if (typeof value !== 'string') return null
+  try {
+    const parsed = new URL(value, 'http://syncbase.invalid')
+    if (!['http:', 'https:'].includes(parsed.protocol) || parsed.username || parsed.password || parsed.hash) return null
+    return `${parsed.pathname}${parsed.search}` === expectedPath ? expectedPath : null
+  } catch {
+    return null
+  }
+}
+
+function isSearchResult(payload: unknown): payload is SearchResult {
+  if (typeof payload !== 'object' || payload === null) return false
+  const value = payload as Record<string, unknown>
+  const expectedSourcePath = typeof value.document_id === 'string' && isPositiveInteger(value.document_version) && isPositiveInteger(value.page_number)
+    ? searchResultSourcePath(value.document_id, value.document_version, value.page_number)
+    : ''
+  return (
+    isPositiveInteger(value.rank) &&
+    typeof value.score === 'number' && Number.isFinite(value.score) && value.score >= 0 && value.score <= 1 &&
+    typeof value.document_id === 'string' && value.document_id.length > 0 &&
+    typeof value.document_name === 'string' && value.document_name.length > 0 &&
+    typeof value.version_id === 'string' && value.version_id.length > 0 &&
+    isPositiveInteger(value.document_version) &&
+    isPositiveInteger(value.page_number) &&
+    typeof value.snippet === 'string' &&
+    normalizedSourcePath(value.source_url, expectedSourcePath) !== null
+  )
+}
+
+function parseSearchResponse(payload: unknown): SearchResponse {
+  if (typeof payload !== 'object' || payload === null) {
+    throw invalidResponse('검색 응답 형식이 올바르지 않습니다.')
+  }
+  const value = payload as Record<string, unknown>
+  const results = value.results
+  if (
+    typeof value.query !== 'string' ||
+    !Array.isArray(results) ||
+    results.some((result) => !isSearchResult(result))
+  ) {
+    throw invalidResponse('검색 응답 형식이 올바르지 않습니다.')
+  }
+
+  const normalizedResults = (results as SearchResult[]).map((result) => ({
+    ...result,
+    source_url: searchResultSourcePath(result.document_id, result.document_version, result.page_number),
+  }))
+  const hasGroundingStatus = Object.prototype.hasOwnProperty.call(value, 'grounding_status')
+  const hasGroundingReason = Object.prototype.hasOwnProperty.call(value, 'grounding_reason')
+  if (!hasGroundingStatus && !hasGroundingReason) {
+    return {
+      query: value.query,
+      grounding_status: normalizedResults.length > 0 ? 'SUPPORTED' : 'INSUFFICIENT_EVIDENCE',
+      grounding_reason: normalizedResults.length > 0 ? null : 'NO_HITS_ABOVE_POLICY',
+      results: normalizedResults,
+    }
+  }
+  if (hasGroundingStatus !== hasGroundingReason) {
+    throw invalidResponse('검색 근거 상태를 확인할 수 없습니다.')
+  }
+
+  const validStatus = value.grounding_status === 'SUPPORTED' || value.grounding_status === 'INSUFFICIENT_EVIDENCE'
+  const validReason = value.grounding_reason === null || [
+    'NO_HITS_ABOVE_POLICY',
+    'ONLY_INACTIVE_VERSION_MATCHED',
+    'SOURCE_UNAVAILABLE',
+  ].includes(String(value.grounding_reason))
+  const hasSupportedEvidence = value.grounding_status === 'SUPPORTED' && value.grounding_reason === null && normalizedResults.length > 0
+  const hasInsufficientEvidence = value.grounding_status === 'INSUFFICIENT_EVIDENCE' && value.grounding_reason !== null && normalizedResults.length === 0
+  if (
+    !validStatus ||
+    !validReason ||
+    (!hasSupportedEvidence && !hasInsufficientEvidence)
+  ) {
+    throw invalidResponse('검색 응답 형식이 올바르지 않습니다.')
+  }
+  return {
+    ...(payload as SearchResponse),
+    results: normalizedResults,
+  }
+}
+
+function parseSource(payload: unknown): Source {
+  if (typeof payload !== 'object' || payload === null) {
+    throw invalidResponse('원문 응답 형식이 올바르지 않습니다.')
+  }
+  const value = payload as Record<string, unknown>
+  const expectedSourceURL = typeof value.documentId === 'string' && isPositiveInteger(value.version) && isPositiveInteger(value.page)
+    ? `/sources/${encodeURIComponent(value.documentId)}/versions/${value.version}?page=${value.page}`
+    : ''
+  const expectedRawPDFURL = typeof value.documentId === 'string' && isPositiveInteger(value.version)
+    ? `/api/v1/documents/${encodeURIComponent(value.documentId)}/versions/${value.version}/raw.pdf`
+    : ''
+  if (
+    typeof value.documentId !== 'string' || value.documentId.length === 0 ||
+    typeof value.documentName !== 'string' || value.documentName.length === 0 ||
+    typeof value.versionId !== 'string' || value.versionId.length === 0 ||
+    !isPositiveInteger(value.version) ||
+    !isPositiveInteger(value.pageCount) ||
+    !isPositiveInteger(value.page) || value.page > value.pageCount ||
+    value.sourceUrl !== expectedSourceURL ||
+    value.rawPdfUrl !== expectedRawPDFURL
+  ) {
+    throw invalidResponse('원문 응답 형식이 올바르지 않습니다.')
+  }
+  return payload as Source
 }
 
 function isDocumentSummary(payload: unknown): payload is DocumentSummary {
@@ -260,10 +320,15 @@ export const api = {
     return parseSearchResponse(payload)
   },
 
-  source(documentID: string, version: number, page: number): Promise<Source> {
-    return request<Source>(
+  async source(documentID: string, version: number, page: number): Promise<Source> {
+    const payload = await request<unknown>(
       `/api/v1/documents/${encodeURIComponent(documentID)}/versions/${version}/source?page=${page}`,
     )
+    const source = parseSource(payload)
+    if (source.documentId !== documentID || source.version !== version || source.page !== page) {
+      throw invalidResponse('원문 응답이 요청한 Document·Version·페이지와 일치하지 않습니다.')
+    }
+    return source
   },
 
   rawPDFURL(documentID: string, version: number): string {

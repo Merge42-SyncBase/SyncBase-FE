@@ -166,13 +166,13 @@ export function UploadPage() {
   function onDrop(event: DragEvent<HTMLDivElement>) { event.preventDefault(); setDragging(false); void choose(event.dataTransfer.files[0]) }
 
   return <div className="page-stack narrow-page">
-    <header className="page-header"><Link className="back-link" to={isVersion ? `/documents/${documentID}` : '/documents'}>← 취소</Link><p className="eyebrow">{isVersion ? 'New version' : 'New document'}</p><h1>{isVersion ? '새 PDF 버전 등록' : 'PDF 등록'}</h1><p className="muted">서버가 PDF·페이지·텍스트·SHA-256을 확인한 뒤 처리 대기열에 등록합니다.</p></header>
+    <header className="page-header"><Link className="back-link" to={isVersion ? `/documents/${documentID}` : '/documents'}>← 취소</Link><h1>{isVersion ? '새 Version 등록' : '새 Document 등록'}</h1><p className="muted">서버가 PDF·페이지·텍스트·SHA-256을 확인한 뒤 처리 대기열에 등록합니다.</p></header>
     {initial.error && <ErrorNotice>{initial.error}</ErrorNotice>}
     {error && <ErrorNotice>{error}</ErrorNotice>}
-    {recovery && <div className="notice info" role="status">{recoveryMessage(recovery)} <code>{state.current.requestKey}</code>{recovery.status === 'not_committed' && ' 같은 PDF를 다시 선택한 뒤 재제출할 수 있습니다.'}</div>}
+    {recovery && <div className={`notice ${recoveryNoticeTone(recovery.status)}`} role="status">{recoveryMessage(recovery)} <code>{state.current.requestKey}</code>{recovery.status === 'not_committed' && ' 같은 PDF를 다시 선택한 뒤 재제출할 수 있습니다.'}</div>}
     <form className="upload-layout" onSubmit={(event) => void submit(event)} noValidate>
       <section className="panel">
-        <div className="panel-header"><h2>1. PDF 선택</h2><p>텍스트 PDF만 지원하며 OCR은 P0 범위에 포함하지 않습니다.</p></div>
+        <div className="panel-header"><h2>1. PDF 선택</h2><p>텍스트 PDF만 지원합니다. 스캔 이미지 OCR은 현재 지원하지 않습니다.</p></div>
         <div className={`dropzone ${dragging ? 'dragging' : ''} ${file ? 'chosen' : ''}`} onDragOver={(event) => { event.preventDefault(); setDragging(true) }} onDragLeave={() => setDragging(false)} onDrop={onDrop}>
           {file ? <><strong>{file.name}</strong><span>{formatBytes(file.size)}</span><button className="button secondary" type="button" onClick={() => { setFile(null); setPreflight(null) }}>파일 교체</button></> : <><span className="file-icon" aria-hidden="true">PDF</span><strong>PDF를 여기에 놓으세요</strong><span>또는 파일 선택 버튼을 사용하세요.</span><label className="button secondary">파일 선택<input type="file" accept="application/pdf,.pdf" onChange={onFileInput} /></label></>}
         </div>
@@ -180,7 +180,7 @@ export function UploadPage() {
         {preflight && <dl className="preflight"><div><dt>파일</dt><dd>{preflight.fileName}</dd></div><div><dt>크기</dt><dd>{formatBytes(preflight.byteSize)}</dd></div><div><dt>페이지</dt><dd>{preflight.pageCount}페이지</dd></div><div><dt>SHA-256</dt><dd><code>{preflight.sha256}</code></dd></div></dl>}
       </section>
       <aside className="panel upload-sidebar">
-        <h2>2. 등록 정보</h2>
+        <h2>2. {isVersion ? 'Version 확인' : 'Document 정보'}</h2>
         {!isVersion && <label><span>문서명</span><input value={name} maxLength={200} onChange={(event) => setName(event.target.value)} required /></label>}
         {!isVersion && <NameGuidance checking={checkingName} error={nameMatchError} matches={nameMatches} />}
         <div className="request-key"><span>복구 코드</span><code>{state.current.requestKey}</code>{fingerprint && <small>브라우저 지문: {fingerprint}</small>}</div>
@@ -242,4 +242,7 @@ function formatBytes(value: number): string {
   return `${(value / 1024 / 1024).toFixed(2)} MB`
 }
 function recoveryMessage(recovery: UploadRecovery): string { return ({ pending: '등록 승인 결과를 확인하고 있습니다.', accepted: '등록이 승인되었습니다.', conflict: '복구 코드가 다른 요청과 충돌합니다.', expired: '복구 코드가 만료되었습니다.', not_committed: '아직 승인된 등록이 없습니다.' } as Record<string, string>)[recovery.status] }
+export function recoveryNoticeTone(status: UploadRecovery['status']): 'pending' | 'success' | 'error' | 'neutral' {
+  return ({ pending: 'pending', accepted: 'success', conflict: 'error', expired: 'error', not_committed: 'neutral' } as const)[status]
+}
 function validDocumentName(value: string): boolean { const length = Array.from(value.trim()).length; return length >= 1 && length <= 200 }

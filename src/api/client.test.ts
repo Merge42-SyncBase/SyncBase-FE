@@ -225,4 +225,129 @@ describe('browser API client', () => {
       code: 'INVALID_RESPONSE',
     })
   })
+
+  it('accepts the grounded search contract and exact source locator', async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({
+        query: '연차 휴가',
+        grounding_status: 'SUPPORTED',
+        grounding_reason: null,
+        results: [{
+          rank: 1,
+          score: 0.93,
+          document_id: 'doc-1',
+          document_name: '인사 규정',
+          version_id: 'version-2',
+          document_version: 2,
+          page_number: 7,
+          snippet: '연차 휴가 근거',
+          source_url: 'http://web/sources/doc-1/versions/2?page=7',
+        }],
+      }), { headers: { 'Content-Type': 'application/json' } }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({
+        documentId: 'doc-1',
+        documentName: '인사 규정',
+        versionId: 'version-2',
+        version: 2,
+        pageCount: 20,
+        page: 7,
+        sourceUrl: '/sources/doc-1/versions/2?page=7',
+        rawPdfUrl: '/api/v1/documents/doc-1/versions/2/raw.pdf',
+      }), { headers: { 'Content-Type': 'application/json' } }))
+    vi.stubGlobal('fetch', fetchMock)
+
+    await expect(api.search('연차 휴가')).resolves.toMatchObject({
+      grounding_status: 'SUPPORTED',
+      grounding_reason: null,
+      results: [{
+        document_id: 'doc-1',
+        document_version: 2,
+        page_number: 7,
+        source_url: '/sources/doc-1/versions/2?page=7',
+      }],
+    })
+    await expect(api.source('doc-1', 2, 7)).resolves.toMatchObject({
+      documentId: 'doc-1', version: 2, page: 7,
+    })
+  })
+
+  it('rejects internally inconsistent grounding and source responses', async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({
+        query: '연차 휴가',
+        grounding_status: 'INSUFFICIENT_EVIDENCE',
+        grounding_reason: null,
+        results: [],
+      }), { headers: { 'Content-Type': 'application/json' } }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({
+        documentId: 'doc-1',
+        documentName: '인사 규정',
+        versionId: 'version-2',
+        version: 2,
+        pageCount: 6,
+        page: 7,
+        sourceUrl: '/sources/doc-1/versions/2?page=7',
+        rawPdfUrl: '/api/v1/documents/doc-1/versions/2/raw.pdf',
+      }), { headers: { 'Content-Type': 'application/json' } }))
+    vi.stubGlobal('fetch', fetchMock)
+
+    await expect(api.search('연차 휴가')).rejects.toMatchObject({
+      name: 'APIError', code: 'INVALID_RESPONSE', status: 502,
+    })
+    await expect(api.source('doc-1', 2, 7)).rejects.toMatchObject({
+      name: 'APIError', code: 'INVALID_RESPONSE', status: 502,
+    })
+  })
+
+  it('fails closed when grounding status disagrees with result presence', async () => {
+    const result = {
+      rank: 1,
+      score: 0.93,
+      document_id: 'doc-1',
+      document_name: '인사 규정',
+      version_id: 'version-2',
+      document_version: 2,
+      page_number: 7,
+      snippet: '연차 휴가 근거',
+      source_url: '/sources/doc-1/versions/2?page=7',
+    }
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({
+        query: '연차 휴가',
+        grounding_status: 'SUPPORTED',
+        grounding_reason: null,
+        results: [],
+      }), { headers: { 'Content-Type': 'application/json' } }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({
+        query: '연차 휴가',
+        grounding_status: 'INSUFFICIENT_EVIDENCE',
+        grounding_reason: 'NO_HITS_ABOVE_POLICY',
+        results: [result],
+      }), { headers: { 'Content-Type': 'application/json' } }))
+    vi.stubGlobal('fetch', fetchMock)
+
+    await expect(api.search('연차 휴가')).rejects.toMatchObject({
+      name: 'APIError', code: 'INVALID_RESPONSE', status: 502,
+    })
+    await expect(api.search('연차 휴가')).rejects.toMatchObject({
+      name: 'APIError', code: 'INVALID_RESPONSE', status: 502,
+    })
+  })
+
+  it('fails closed when source metadata does not match the requested evidence identity', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({
+      documentId: 'doc-2',
+      documentName: '인사 규정',
+      versionId: 'version-2',
+      version: 2,
+      pageCount: 20,
+      page: 7,
+      sourceUrl: '/sources/doc-2/versions/2?page=7',
+      rawPdfUrl: '/api/v1/documents/doc-2/versions/2/raw.pdf',
+    }), { headers: { 'Content-Type': 'application/json' } })))
+
+    await expect(api.source('doc-1', 2, 7)).rejects.toMatchObject({
+      name: 'APIError', code: 'INVALID_RESPONSE', status: 502,
+    })
+  })
 })

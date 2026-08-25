@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { api } from '../api/client'
-import { UploadPage } from './UploadPage'
+import { recoveryNoticeTone, UploadPage } from './UploadPage'
 
 vi.mock('../api/client', () => ({
   APIError: class APIError extends Error {},
@@ -113,5 +113,17 @@ describe('new Document name guidance', () => {
       expect.any(String),
       'csrf-test',
     ))
+  })
+})
+
+describe('registration recovery notice semantics', () => {
+  it.each([
+    ['pending', 'pending'],
+    ['accepted', 'success'],
+    ['conflict', 'error'],
+    ['expired', 'error'],
+    ['not_committed', 'neutral'],
+  ] as const)('maps %s to the %s visual state', (status, tone) => {
+    expect(recoveryNoticeTone(status)).toBe(tone)
   })
 })

@@ -1,9 +1,15 @@
-import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthProvider'
+import { isDocumentAdmin, landingPathForRole } from '../auth/roles'
+import { DocumentIcon, SearchIcon } from './Icons'
 
 export function AppShell() {
   const { session, logout } = useAuth()
+  const location = useLocation()
   const navigate = useNavigate()
+  const documentAdmin = isDocumentAdmin(session?.user.role ?? '')
+  const roleLabel = documentAdmin ? '문서 운영 관리자' : '일반 팀원'
+  const searchWorkspace = location.pathname === '/search'
 
   async function handleLogout() {
     await logout()
@@ -14,22 +20,22 @@ export function AppShell() {
     <div className="app-shell">
       <a className="skip-link" href="#main-content">본문으로 건너뛰기</a>
       <aside className="sidebar">
-        <NavLink className="brand" to="/documents">
+        <NavLink className="brand" to={landingPathForRole(session?.user.role ?? '')}>
           <span className="brand-mark" aria-hidden="true">S</span>
-          <span><strong>SyncBase</strong><small>근거 기반 지식 운영</small></span>
+          <span><strong>SyncBase</strong><small>{roleLabel}</small></span>
         </NavLink>
         <nav aria-label="주 메뉴">
-          <NavLink to="/documents">문서</NavLink>
-          <NavLink to="/search">근거 검색</NavLink>
+          <NavLink to="/search"><SearchIcon className="nav-icon" />근거 검색</NavLink>
+          {documentAdmin && <NavLink to="/documents"><DocumentIcon className="nav-icon" />문서 운영</NavLink>}
         </nav>
         <div className="sidebar-footer">
+          <span className="role-name">{roleLabel}</span>
           <span className="user-name">{session?.user.username}</span>
           <button className="button link-button" onClick={() => void handleLogout()}>로그아웃</button>
         </div>
       </aside>
-      <section className="workspace">
-        <header className="topbar"><span>PostgreSQL · Go RAG</span><strong>운영 콘솔</strong></header>
-        <main id="main-content"><Outlet /></main>
+      <section className={`workspace${searchWorkspace ? ' workspace-evidence' : ''}`}>
+        <main id="main-content" tabIndex={-1}><Outlet /></main>
       </section>
     </div>
   )

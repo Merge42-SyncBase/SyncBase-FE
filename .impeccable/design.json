@@ -1,0 +1,366 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-25T01:43:37Z",
+  "title": "Design System: SyncBase Evidence Workbench",
+  "extensions": {
+    "colorMeta": {
+      "navy-950": {
+        "role": "neutral",
+        "displayName": "Role Rail Navy",
+        "description": "Authenticated application rail and login perimeter.",
+        "tonalRamp": ["oklch(15% 0.042 257.8)", "oklch(27% 0.042 257.8)", "oklch(39% 0.042 257.8)", "oklch(51% 0.042 257.8)", "oklch(63% 0.042 257.8)", "oklch(75% 0.042 257.8)", "oklch(87% 0.042 257.8)", "oklch(95% 0.042 257.8)"]
+      },
+      "navy-900": {
+        "role": "neutral",
+        "displayName": "Layered Rail Navy",
+        "description": "Login introduction and the raised layer within the navy family.",
+        "tonalRamp": ["oklch(15% 0.047 256.6)", "oklch(27% 0.047 256.6)", "oklch(39% 0.047 256.6)", "oklch(51% 0.047 256.6)", "oklch(63% 0.047 256.6)", "oklch(75% 0.047 256.6)", "oklch(87% 0.047 256.6)", "oklch(95% 0.047 256.6)"]
+      },
+      "navy-800": {
+        "role": "neutral",
+        "displayName": "Selected Rail Navy",
+        "description": "Active and hovered navigation inside the role rail.",
+        "tonalRamp": ["oklch(15% 0.070 258.3)", "oklch(27% 0.070 258.3)", "oklch(39% 0.070 258.3)", "oklch(51% 0.070 258.3)", "oklch(63% 0.070 258.3)", "oklch(75% 0.070 258.3)", "oklch(87% 0.070 258.3)", "oklch(95% 0.070 258.3)"]
+      },
+      "blue-700": {
+        "role": "primary",
+        "displayName": "Deep Action Cobalt",
+        "description": "Hovered primary actions and darker actionable emphasis.",
+        "tonalRamp": ["oklch(15% 0.181 262.5)", "oklch(27% 0.181 262.5)", "oklch(39% 0.181 262.5)", "oklch(51% 0.181 262.5)", "oklch(63% 0.181 262.5)", "oklch(75% 0.181 262.5)", "oklch(87% 0.181 262.5)", "oklch(95% 0.181 262.5)"]
+      },
+      "blue-600": {
+        "role": "primary",
+        "displayName": "Action Cobalt",
+        "description": "Primary actions, selected ranks, and the strongest intent cue.",
+        "tonalRamp": ["oklch(15% 0.199 261.9)", "oklch(27% 0.199 261.9)", "oklch(39% 0.199 261.9)", "oklch(51% 0.199 261.9)", "oklch(63% 0.199 261.9)", "oklch(75% 0.199 261.9)", "oklch(87% 0.199 261.9)", "oklch(95% 0.199 261.9)"]
+      },
+      "blue-100": {
+        "role": "primary",
+        "displayName": "Selection Wash",
+        "description": "Pale support for focus and selected-state backgrounds.",
+        "tonalRamp": ["oklch(15% 0.022 265.8)", "oklch(27% 0.022 265.8)", "oklch(39% 0.022 265.8)", "oklch(51% 0.022 265.8)", "oklch(63% 0.022 265.8)", "oklch(75% 0.022 265.8)", "oklch(87% 0.022 265.8)", "oklch(95% 0.022 265.8)"]
+      },
+      "green-700": {
+        "role": "status",
+        "displayName": "Verified Green",
+        "description": "ACTIVE, complete, success, and selected positive evidence states.",
+        "tonalRamp": ["oklch(15% 0.104 163.4)", "oklch(27% 0.104 163.4)", "oklch(39% 0.104 163.4)", "oklch(51% 0.104 163.4)", "oklch(63% 0.104 163.4)", "oklch(75% 0.104 163.4)", "oklch(87% 0.104 163.4)", "oklch(95% 0.104 163.4)"]
+      },
+      "green-100": {
+        "role": "status",
+        "displayName": "Verified Mint",
+        "description": "Low-emphasis background for ACTIVE and successful states.",
+        "tonalRamp": ["oklch(15% 0.032 166.2)", "oklch(27% 0.032 166.2)", "oklch(39% 0.032 166.2)", "oklch(51% 0.032 166.2)", "oklch(63% 0.032 166.2)", "oklch(75% 0.032 166.2)", "oklch(87% 0.032 166.2)", "oklch(95% 0.032 166.2)"]
+      },
+      "amber-800": {
+        "role": "status",
+        "displayName": "Attention Amber",
+        "description": "Queued, current, and in-progress operational states.",
+        "tonalRamp": ["oklch(15% 0.099 69.6)", "oklch(27% 0.099 69.6)", "oklch(39% 0.099 69.6)", "oklch(51% 0.099 69.6)", "oklch(63% 0.099 69.6)", "oklch(75% 0.099 69.6)", "oklch(87% 0.099 69.6)", "oklch(95% 0.099 69.6)"]
+      },
+      "amber-100": {
+        "role": "status",
+        "displayName": "Attention Wash",
+        "description": "Low-emphasis background for queued and in-progress states.",
+        "tonalRamp": ["oklch(15% 0.038 86.9)", "oklch(27% 0.038 86.9)", "oklch(39% 0.038 86.9)", "oklch(51% 0.038 86.9)", "oklch(63% 0.038 86.9)", "oklch(75% 0.038 86.9)", "oklch(87% 0.038 86.9)", "oklch(95% 0.038 86.9)"]
+      },
+      "red-700": {
+        "role": "status",
+        "displayName": "Failure Crimson",
+        "description": "Failed processing, blocking errors, and recovery-required states.",
+        "tonalRamp": ["oklch(15% 0.166 16.1)", "oklch(27% 0.166 16.1)", "oklch(39% 0.166 16.1)", "oklch(51% 0.166 16.1)", "oklch(63% 0.166 16.1)", "oklch(75% 0.166 16.1)", "oklch(87% 0.166 16.1)", "oklch(95% 0.166 16.1)"]
+      },
+      "red-100": {
+        "role": "status",
+        "displayName": "Failure Wash",
+        "description": "Low-emphasis background for failure and error states.",
+        "tonalRamp": ["oklch(15% 0.025 5.1)", "oklch(27% 0.025 5.1)", "oklch(39% 0.025 5.1)", "oklch(51% 0.025 5.1)", "oklch(63% 0.025 5.1)", "oklch(75% 0.025 5.1)", "oklch(87% 0.025 5.1)", "oklch(95% 0.025 5.1)"]
+      },
+      "ink-900": {
+        "role": "neutral",
+        "displayName": "Primary Evidence Ink",
+        "description": "Primary operational text and source labels.",
+        "tonalRamp": ["oklch(15% 0.045 260.5)", "oklch(27% 0.045 260.5)", "oklch(39% 0.045 260.5)", "oklch(51% 0.045 260.5)", "oklch(63% 0.045 260.5)", "oklch(75% 0.045 260.5)", "oklch(87% 0.045 260.5)", "oklch(95% 0.045 260.5)"]
+      },
+      "ink-700": {
+        "role": "neutral",
+        "displayName": "Supporting Evidence Ink",
+        "description": "Secondary descriptions and dark control text.",
+        "tonalRamp": ["oklch(15% 0.049 257.5)", "oklch(27% 0.049 257.5)", "oklch(39% 0.049 257.5)", "oklch(51% 0.049 257.5)", "oklch(63% 0.049 257.5)", "oklch(75% 0.049 257.5)", "oklch(87% 0.049 257.5)", "oklch(95% 0.049 257.5)"]
+      },
+      "ink-500": {
+        "role": "neutral",
+        "displayName": "Muted Metadata Ink",
+        "description": "Explanatory copy, provenance labels, and quiet counts.",
+        "tonalRamp": ["oklch(15% 0.038 255.3)", "oklch(27% 0.038 255.3)", "oklch(39% 0.038 255.3)", "oklch(51% 0.038 255.3)", "oklch(63% 0.038 255.3)", "oklch(75% 0.038 255.3)", "oklch(87% 0.038 255.3)", "oklch(95% 0.038 255.3)"]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Ledger Rule",
+        "description": "Default dividers, row separators, and surface boundaries.",
+        "tonalRamp": ["oklch(15% 0.019 258.4)", "oklch(27% 0.019 258.4)", "oklch(39% 0.019 258.4)", "oklch(51% 0.019 258.4)", "oklch(63% 0.019 258.4)", "oklch(75% 0.019 258.4)", "oklch(87% 0.019 258.4)", "oklch(95% 0.019 258.4)"]
+      },
+      "line-strong": {
+        "role": "neutral",
+        "displayName": "Strong Control Rule",
+        "description": "Inputs, viewer controls, and high-legibility boundaries.",
+        "tonalRamp": ["oklch(15% 0.026 255.6)", "oklch(27% 0.026 255.6)", "oklch(39% 0.026 255.6)", "oklch(51% 0.026 255.6)", "oklch(63% 0.026 255.6)", "oklch(75% 0.026 255.6)", "oklch(87% 0.026 255.6)", "oklch(95% 0.026 255.6)"]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Evidence Surface",
+        "description": "Panels, selected results, controls, and the PDF sheet.",
+        "tonalRamp": ["oklch(15% 0 0)", "oklch(27% 0 0)", "oklch(39% 0 0)", "oklch(51% 0 0)", "oklch(63% 0 0)", "oklch(75% 0 0)", "oklch(87% 0 0)", "oklch(95% 0 0)"]
+      },
+      "worktop": {
+        "role": "neutral",
+        "displayName": "Quiet Worktop",
+        "description": "Application canvas behind operational surfaces.",
+        "tonalRamp": ["oklch(15% 0.005 258.3)", "oklch(27% 0.005 258.3)", "oklch(39% 0.005 258.3)", "oklch(51% 0.005 258.3)", "oklch(63% 0.005 258.3)", "oklch(75% 0.005 258.3)", "oklch(87% 0.005 258.3)", "oklch(95% 0.005 258.3)"]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Login Promise",
+        "purpose": "Authentication promise only; short Korean lines with institutional authority."
+      },
+      "headline": {
+        "displayName": "Operational Headline",
+        "purpose": "Page-level task titles with a compact line length."
+      },
+      "title": {
+        "displayName": "Panel Title",
+        "purpose": "Panels, Version records, source sections, and upload steps."
+      },
+      "body": {
+        "displayName": "Operational Body",
+        "purpose": "Default reading text, form content, and explanatory copy."
+      },
+      "label": {
+        "displayName": "Ledger Label",
+        "purpose": "Table headers, provenance labels, roles, counts, and compact metadata."
+      },
+      "metadata-mono": {
+        "displayName": "Exact Identifier",
+        "purpose": "Document IDs, Version IDs, hashes, run IDs, correlation IDs, and recovery keys."
+      }
+    },
+    "shadows": [
+      {
+        "name": "brand-mark",
+        "value": "0 5px 14px #07101f66",
+        "purpose": "Separates the small SyncBase mark from the deep role rail."
+      },
+      {
+        "name": "action-rest",
+        "value": "0 2px 5px #244db33d",
+        "purpose": "Low cobalt depth on primary actions only."
+      },
+      {
+        "name": "action-hover",
+        "value": "0 4px 10px #244db347",
+        "purpose": "Restrained hover lift for primary actions."
+      },
+      {
+        "name": "search-inset",
+        "value": "inset 0 1px 2px #1f29370a",
+        "purpose": "Nearly imperceptible inner edge in the evidence search field."
+      },
+      {
+        "name": "selected-evidence",
+        "value": "0 5px 16px #315ed91c",
+        "purpose": "Faint blue depth paired with the explicit selected-result border."
+      },
+      {
+        "name": "source-page",
+        "value": "0 9px 28px #17243a38",
+        "purpose": "Separates the white PDF sheet from its gray document stage."
+      },
+      {
+        "name": "login-shell",
+        "value": "0 24px 70px #050b14a3",
+        "purpose": "Large-screen authentication-shell exception."
+      }
+    ],
+    "motion": [
+      {
+        "name": "state-fast",
+        "value": "140ms ease-out",
+        "purpose": "Navigation, button, border, color, and shadow state transitions."
+      },
+      {
+        "name": "loading-pulse",
+        "value": "1.6s ease-in-out infinite",
+        "purpose": "Quiet tonal pulse for loading placeholders only."
+      },
+      {
+        "name": "reduced-motion-duration",
+        "value": "0.01ms",
+        "purpose": "Effective transition and animation duration under prefers-reduced-motion."
+      }
+    ],
+    "breakpoints": [
+      { "name": "evidence-tight", "value": "1120px" },
+      { "name": "compact-shell", "value": "980px" },
+      { "name": "operational-stack", "value": "720px" },
+      { "name": "mobile", "value": "560px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The single clear submit, registration, or Original-opening action in a region.",
+      "html": "<button class=\"ds-button-primary\" type=\"button\">검색</button>",
+      "css": ".ds-button-primary { min-height: 38px; display: inline-flex; align-items: center; justify-content: center; padding: 8px 13px; color: #fff; background: var(--blue-600); border: 1px solid transparent; border-radius: 5px; font-family: \"Pretendard Variable\", Pretendard, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif; font-size: 1rem; font-weight: 680; line-height: 1.45; box-shadow: 0 2px 5px #244db33d; cursor: pointer; transition: background-color 140ms ease-out, border-color 140ms ease-out, color 140ms ease-out, box-shadow 140ms ease-out; } .ds-button-primary:hover:not(:disabled) { background: var(--blue-700); box-shadow: 0 4px 10px #244db347; } .ds-button-primary:focus-visible { outline: 3px solid #8facff; outline-offset: 2px; } .ds-button-primary:disabled { cursor: not-allowed; opacity: 0.55; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "A bordered supporting action for file choice, retry, navigation, or source recovery.",
+      "html": "<button class=\"ds-button-secondary\" type=\"button\">원문 확인</button>",
+      "css": ".ds-button-secondary { min-height: 38px; display: inline-flex; align-items: center; justify-content: center; padding: 8px 13px; color: #263651; background: #fff; border: 1px solid var(--line-strong); border-radius: 5px; font-family: \"Pretendard Variable\", Pretendard, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif; font-size: 1rem; font-weight: 680; line-height: 1.45; cursor: pointer; transition: background-color 140ms ease-out, border-color 140ms ease-out, color 140ms ease-out, box-shadow 140ms ease-out; } .ds-button-secondary:hover:not(:disabled) { color: #163f97; background: #f8faff; border-color: #7f9bd5; } .ds-button-secondary:focus-visible { outline: 3px solid #8facff; outline-offset: 2px; } .ds-button-secondary:disabled { cursor: not-allowed; opacity: 0.55; }"
+    },
+    {
+      "name": "Evidence Search Field",
+      "kind": "input",
+      "refersTo": "input-search",
+      "description": "The 46px query field with explicit search and clear affordances.",
+      "html": "<label class=\"ds-search-field\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><circle cx=\"11\" cy=\"11\" r=\"6.25\"></circle><path d=\"m16 16 4 4\"></path></svg><input aria-label=\"조직 지식 검색어\" value=\"연차 휴가는 며칠인가?\"><button type=\"button\" aria-label=\"검색어 지우기\">×</button></label>",
+      "css": ".ds-search-field { position: relative; width: min(100%, 520px); display: block; } .ds-search-field > svg { position: absolute; top: 50%; left: 12px; width: 17px; height: 17px; fill: none; stroke: #718299; stroke-linecap: round; stroke-width: 1.8; transform: translateY(-50%); pointer-events: none; } .ds-search-field > input { width: 100%; height: 46px; padding: 0 42px 0 38px; color: var(--ink-900); caret-color: var(--blue-600); background: #fff; border: 1px solid #b9c7d8; border-radius: 5px; box-shadow: inset 0 1px 2px #1f29370a; font-family: \"Pretendard Variable\", Pretendard, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif; font-size: 1rem; } .ds-search-field > input:focus { border-color: #6d91ee; outline: 3px solid #dbe7ff; } .ds-search-field > button { position: absolute; top: 50%; right: 8px; width: 30px; height: 30px; display: grid; place-items: center; padding: 0; color: #445873; background: transparent; border: 0; border-radius: 5px; font-size: 1.22rem; line-height: 1; transform: translateY(-50%); cursor: pointer; } .ds-search-field > button:hover { color: #17263d; background: #edf1f6; } .ds-search-field > button:focus-visible { outline: 3px solid #8facff; outline-offset: 2px; }"
+    },
+    {
+      "name": "General-Team Role Navigation",
+      "kind": "nav",
+      "refersTo": "nav-active",
+      "description": "The compact permission-aware rail for a general team member, with grounded search as its sole product destination.",
+      "html": "<nav class=\"ds-role-rail\" aria-label=\"주 메뉴\"><div class=\"ds-rail-brand\"><span class=\"ds-brand-mark\">S</span><span><strong>SyncBase</strong><small>일반 팀원</small></span></div><a class=\"ds-nav-active\" href=\"#\" aria-current=\"page\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><circle cx=\"11\" cy=\"11\" r=\"6.25\"></circle><path d=\"m16 16 4 4\"></path></svg>근거 검색</a></nav>",
+      "css": ".ds-role-rail { width: 190px; display: grid; align-content: start; gap: 26px; padding: 20px 12px 18px; color: #dce5f5; background: var(--navy-950); font-family: \"Pretendard Variable\", Pretendard, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif; } .ds-rail-brand { display: flex; align-items: center; gap: 10px; padding: 0 4px 18px; color: #fff; border-bottom: 1px solid #2a3a54; } .ds-rail-brand strong { display: block; font-size: 0.95rem; letter-spacing: -0.015em; } .ds-rail-brand small { display: block; margin-top: 3px; color: #b8c4d8; font-size: 0.7rem; } .ds-brand-mark { width: 32px; height: 32px; display: inline-grid; flex: 0 0 auto; place-items: center; color: #fff; background: #315ed9; border-radius: 7px; box-shadow: 0 5px 14px #07101f66; font-weight: 800; } .ds-nav-active { min-height: 38px; display: flex; align-items: center; gap: 9px; padding: 9px 11px; color: #fff; background: var(--navy-800); border-radius: 6px; font-size: 0.88rem; font-weight: 680; text-decoration: none; transition: color 140ms ease-out, background-color 140ms ease-out; } .ds-nav-active svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; } .ds-nav-active:hover { color: #fff; background: var(--navy-800); } .ds-nav-active:focus-visible { outline: 3px solid #8facff; outline-offset: 2px; }"
+    },
+    {
+      "name": "ACTIVE Chip",
+      "kind": "chip",
+      "refersTo": "active-chip",
+      "description": "A literal status marker for the Version currently available to search.",
+      "html": "<span class=\"ds-active-chip\">ACTIVE</span>",
+      "css": ".ds-active-chip { display: inline-flex; width: fit-content; padding: 4px 7px; color: var(--green-700); background: var(--green-100); border-radius: 999px; font-family: \"Pretendard Variable\", Pretendard, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif; font-size: 0.71rem; font-weight: 760; line-height: 1; }"
+    },
+    {
+      "name": "Bordered Operational Panel",
+      "kind": "card",
+      "refersTo": "panel",
+      "description": "The flat default container for operational content and form steps.",
+      "html": "<section class=\"ds-panel\"><h2>Document 목록</h2><p>동일한 표시 이름은 Document ID로 구분합니다.</p></section>",
+      "css": ".ds-panel { padding: 22px; color: var(--ink-900); background: #fff; border: 1px solid var(--line); border-radius: 7px; font-family: \"Pretendard Variable\", Pretendard, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif; } .ds-panel h2 { margin: 0; font-size: 1.02rem; letter-spacing: -0.018em; } .ds-panel p { margin: 5px 0 0; color: var(--ink-500); font-size: 0.86rem; line-height: 1.45; }"
+    },
+    {
+      "name": "Selected Evidence Result",
+      "kind": "custom",
+      "refersTo": "evidence-result-selected",
+      "description": "The selected ranked result with visible Version, page, snippet, ACTIVE state, and score.",
+      "html": "<button class=\"ds-evidence-result\" type=\"button\" aria-pressed=\"true\"><span class=\"ds-evidence-rank\">1</span><span class=\"ds-evidence-copy\"><span class=\"ds-evidence-title\"><strong>인사·복무 운영규정</strong><span class=\"ds-evidence-active\">ACTIVE</span></span><span class=\"ds-evidence-meta\">v3 · 12페이지</span><span class=\"ds-evidence-snippet\">제20조(연차유급휴가) 직원의 연차유급휴가는 1년간 80퍼센트 이상 출근한 경우 각 호의 기준에 따라 부여한다.</span></span><strong class=\"ds-evidence-score\">0.96</strong></button>",
+      "css": ".ds-evidence-result { width: 100%; display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; gap: 10px; padding: 16px 13px; color: var(--ink-900); background: #fff; border: 1px solid #3973f2; border-radius: 5px; box-shadow: 0 5px 16px #315ed91c; font-family: \"Pretendard Variable\", Pretendard, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif; text-align: left; cursor: pointer; } .ds-evidence-result:focus-visible { outline: 3px solid #8facff; outline-offset: 2px; } .ds-evidence-rank { width: 21px; height: 21px; display: grid; place-items: center; margin-top: 1px; color: #fff; background: var(--blue-600); border-radius: 999px; font-size: 0.73rem; font-weight: 800; font-variant-numeric: tabular-nums; } .ds-evidence-copy { min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 10px; row-gap: 7px; } .ds-evidence-title { min-width: 0; display: flex; align-items: center; gap: 8px; } .ds-evidence-title > strong { overflow: hidden; color: #0f55be; font-size: 0.85rem; text-overflow: ellipsis; white-space: nowrap; } .ds-evidence-active { flex: 0 0 auto; padding: 3px 6px; color: var(--green-700); background: var(--green-100); border-radius: 999px; font-size: 0.61rem; font-weight: 760; line-height: 1; } .ds-evidence-meta { justify-self: end; color: #5c6e85; font-size: 0.72rem; font-variant-numeric: tabular-nums; } .ds-evidence-snippet { grid-column: 1 / -1; display: -webkit-box; overflow: hidden; color: #35465e; font-size: 0.79rem; line-height: 1.58; -webkit-box-orient: vertical; -webkit-line-clamp: 2; } .ds-evidence-score { align-self: start; color: #0b875e; font-size: 0.81rem; font-variant-numeric: tabular-nums; }"
+    },
+    {
+      "name": "Evidence Provenance Strip",
+      "kind": "custom",
+      "refersTo": "provenance-strip",
+      "description": "Three equal cells keep Version, evidence page, and similarity adjacent to the Original.",
+      "html": "<dl class=\"ds-provenance\"><div><dt>Version</dt><dd>v3</dd></div><div><dt>근거 페이지</dt><dd>12페이지</dd></div><div><dt>유사도</dt><dd>0.96</dd></div></dl>",
+      "css": ".ds-provenance { display: grid; grid-template-columns: repeat(3, 1fr); margin: 0; color: var(--ink-900); background: #fff; border: 1px solid var(--line); font-family: \"Pretendard Variable\", Pretendard, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif; } .ds-provenance > div { display: flex; align-items: baseline; justify-content: center; gap: 5px; padding: 10px; border-right: 1px solid var(--line); } .ds-provenance > div:last-child { border-right: 0; } .ds-provenance dt { color: #5b6d83; font-size: 0.67rem; } .ds-provenance dd { margin: 0; color: #2d3e56; font-size: 0.78rem; font-weight: 750; font-variant-numeric: tabular-nums; }"
+    },
+    {
+      "name": "PDF Viewer Toolbar",
+      "kind": "custom",
+      "refersTo": "viewer-toolbar",
+      "description": "Flat page and zoom controls above the selected Original page.",
+      "html": "<div class=\"ds-viewer-toolbar\"><div class=\"ds-toolbar-group\"><button type=\"button\" aria-label=\"이전 페이지\">‹</button><label><input aria-label=\"현재 페이지\" type=\"number\" value=\"12\"><span>/ 28</span></label><button type=\"button\" aria-label=\"다음 페이지\">›</button></div><div class=\"ds-toolbar-group\"><button type=\"button\" aria-label=\"축소\">−</button><button class=\"ds-zoom-value\" type=\"button\">100%</button><button type=\"button\" aria-label=\"확대\">＋</button></div></div>",
+      "css": ".ds-viewer-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 10px; color: #30445f; background: #f8fafc; border: 1px solid var(--line-strong); font-family: \"Pretendard Variable\", Pretendard, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif; } .ds-toolbar-group { display: flex; align-items: center; gap: 7px; } .ds-toolbar-group > button:not(.ds-zoom-value) { width: 34px; height: 34px; display: grid; place-items: center; padding: 0; color: #30445f; background: #fff; border: 1px solid var(--line-strong); border-radius: 4px; cursor: pointer; } .ds-toolbar-group > button:not(.ds-zoom-value):hover:not(:disabled) { color: #174fae; background: #f2f6ff; border-color: #88a4dc; } .ds-toolbar-group > button:focus-visible, .ds-toolbar-group input:focus-visible { outline: 3px solid #8facff; outline-offset: 2px; } .ds-toolbar-group label { display: flex; align-items: center; gap: 5px; color: #4b5d74; font-size: 0.78rem; } .ds-toolbar-group input { width: 54px; min-height: 34px; padding: 4px; color: var(--ink-900); background: #fff; border: 1px solid var(--line-strong); border-radius: 4px; font: inherit; font-variant-numeric: tabular-nums; text-align: center; } .ds-zoom-value { min-width: 52px; min-height: 34px; padding: 0 5px; color: #384a62; background: transparent; border: 0; border-radius: 4px; font-size: 0.78rem; font-variant-numeric: tabular-nums; cursor: pointer; } .ds-zoom-value:hover { color: #174fae; background: #eaf0fb; }"
+    },
+    {
+      "name": "Processing Pipeline",
+      "kind": "custom",
+      "refersTo": "pipeline-stage-complete",
+      "description": "The six-step operational sequence with complete, current, failed, and pending structure.",
+      "html": "<ol class=\"ds-pipeline\" aria-label=\"Version 처리 단계\"><li class=\"ds-complete\"><span>1</span><strong>확인</strong></li><li class=\"ds-complete\"><span>2</span><strong>텍스트 추출</strong></li><li class=\"ds-complete\"><span>3</span><strong>문단 분리</strong></li><li class=\"ds-current\"><span>4</span><strong>임베딩</strong></li><li><span>5</span><strong>저장</strong></li><li><span>6</span><strong>검색 반영</strong></li></ol>",
+      "css": ".ds-pipeline { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; margin: 0; padding: 0; list-style: none; font-family: \"Pretendard Variable\", Pretendard, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif; } .ds-pipeline li { position: relative; display: grid; justify-items: center; gap: 6px; color: #7a899b; font-size: 0.72rem; text-align: center; } .ds-pipeline li::after { position: absolute; top: 13px; left: calc(50% + 18px); width: calc(100% - 32px); height: 1px; content: \"\"; background: #d8e0ea; } .ds-pipeline li:last-child::after { display: none; } .ds-pipeline li > span { z-index: 1; width: 27px; height: 27px; display: inline-grid; place-items: center; color: #52647a; background: #fff; border: 1px solid #bcc8d8; border-radius: 999px; font-size: 0.7rem; font-variant-numeric: tabular-nums; } .ds-pipeline .ds-complete { color: #126e50; } .ds-pipeline .ds-complete > span { color: #fff; background: #12815e; border-color: #12815e; } .ds-pipeline .ds-complete::after { background: #65b397; } .ds-pipeline .ds-current { color: #754909; } .ds-pipeline .ds-current > span { color: #754909; background: #fff5dd; border-color: #d69b31; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Evidence Workbench",
+    "overview": "SyncBase is a quiet, high-trust institutional evidence ledger. It should feel like an operations instrument for inspecting verified organizational knowledge: a compact deep-navy role rail frames a bright neutral workspace, and every important claim remains visibly connected to its Document, Version, and Original page.\n\nThe world is compact rather than sparse, but its density stays calm through consistent alignment, short Korean-first labels, restrained type sizes, and generous separation between task regions. Search results, processing states, metadata, and source controls read as one factual system rather than a collection of promotional cards.\n\nHierarchy is structural. Flat bordered surfaces, neutral tonal shifts, and precise rules do most of the work; blue is reserved for selection, links, focus, and primary action, while green is reserved for ACTIVE or successful evidence states. Decorative gradients, glass effects, oversized radii, and ambient card shadows do not belong in this world.",
+    "keyCharacteristics": [
+      "Deep-navy role framing around a bright operational worktop.",
+      "Dense, aligned evidence rows with calm neutral separation.",
+      "Exact Document · Version · page provenance beside the Original.",
+      "Blue for intent and selection; semantic color only for operational state.",
+      "Flat bordered surfaces with restrained 4–7px corners.",
+      "Desktop evidence adjacency and a linear search → results → source mobile flow."
+    ],
+    "rules": [
+      {
+        "name": "The Blue Means Intent Rule",
+        "body": "Blue marks something the user can choose, open, focus, or act on; it is not a general-purpose decoration or section color.",
+        "section": "colors"
+      },
+      {
+        "name": "The Green Means Proof Rule",
+        "body": "Green appears only when the interface can name a successful state: ACTIVE, completed, success, or the positive score of the evidence currently selected for verification.",
+        "section": "colors"
+      },
+      {
+        "name": "The Korean First Rule",
+        "body": "Interface labels and explanatory copy begin in Korean; confirmed official terms such as Document, Version, Original, ACTIVE, Parse, Embed, Store, and Processing run remain unchanged.",
+        "section": "typography"
+      },
+      {
+        "name": "The Provenance Is Data Rule",
+        "body": "Exact identifiers and numeric evidence are aligned, tabular, and selectively monospace; they are never styled as decorative technical texture.",
+        "section": "typography"
+      },
+      {
+        "name": "The Evidence Adjacency Rule",
+        "body": "On wide screens, the selected result and its exact Original stay visible side by side; neither pane becomes a detached modal or a decorative preview.",
+        "section": "layout"
+      },
+      {
+        "name": "The Mobile Reading Order Rule",
+        "body": "On narrow screens, preserve the evidence story as search → ranked results → selected provenance → Original page, with no hidden source step.",
+        "section": "layout"
+      },
+      {
+        "name": "The Flat Ledger Rule",
+        "body": "A surface earns elevation only when depth communicates action, current selection, or a physical document; ordinary containers remain border-led and flat.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Restrained Radius Rule",
+        "body": "Use 4–7px for ordinary product geometry and 999px only for status circles or chips; large soft cards would weaken the institutional evidence character.",
+        "section": "shapes"
+      },
+      {
+        "name": "The Role Rail Is Permission Rule",
+        "body": "Navigation mirrors confirmed capability; do not add a destination merely to balance the rail or fill empty space.",
+        "section": "components"
+      }
+    ],
+    "dos": [
+      "Do keep Korean as the default interface language while preserving confirmed official English terms exactly.",
+      "Do keep Document · Version · page provenance visible beside every selected Original.",
+      "Do use blue for selection, links, focus, and primary action, and reserve semantic colors for literal operational states.",
+      "Do use one-pixel borders, aligned metadata cells, tabular numerals, and 4–7px corners to maintain the ledger character.",
+      "Do preserve the desktop side-by-side evidence relationship and the mobile search → results → source reading order.",
+      "Do keep role-specific navigation honest, including a visible logout action in the compact shell."
+    ],
+    "donts": [
+      "Don't use gradients, glass effects, oversized rounded cards, or ambient shadows as general decoration.",
+      "Don't color ordinary headings, panels, or large background regions with the action blue or status colors.",
+      "Don't use green for neutral similarity values, decorative accents, or unconfirmed claims.",
+      "Don't present a snippet as the Original; retain the exact Document, Version, and page bridge to source.",
+      "Don't replace dense evidence rows with spacious marketing cards or hide critical metadata behind hover.",
+      "Don't add unconfirmed product claims, customer proof, navigation destinations, or operational capabilities for visual completeness."
+    ]
+  }
+}

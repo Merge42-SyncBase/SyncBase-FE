@@ -4,3 +4,7 @@ coverage
 *.tsbuildinfo
 .playwright-cli/
 output/playwright/
+
+# CUSTOM
+PRODUCT.md
+.impeccable

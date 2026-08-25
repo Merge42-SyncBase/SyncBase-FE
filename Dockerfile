@@ -14,6 +14,7 @@ RUN npm run build
 FROM ${NGINX_IMAGE} AS production
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/dist /usr/share/nginx/html
+COPY LICENSE THIRD_PARTY_NOTICES.md /usr/share/licenses/syncbase-frontend/
 EXPOSE 8080
 HEALTHCHECK --interval=10s --timeout=3s --start-period=5s --retries=3 \
   CMD wget -q -O /dev/null http://127.0.0.1:8080/healthz || exit 1

@@ -41,3 +41,10 @@ docker build -t syncbase/web:local .
 - [How to verify the Evidence Workbench](docs/how-to-verify-evidence-workbench.md) — 자동 검사와 두 핵심 사용자 여정의 재현 절차
 - [Design system](DESIGN.md) — SyncBase 시각 토큰, 레이아웃, 구성요소 규칙
 - [Evidence Workbench surface brief](.impeccable/surfaces/route-search.md) — 승인된 `/search` 제품·화면 결정
+
+## License
+
+SyncBase Frontend의 자체 소스는 [Apache License 2.0](LICENSE)
+(`Apache-2.0`)으로 배포합니다.
+PDF.js를 포함한 외부 구성요소의 라이선스와 출처는
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)에 구분하여 기록합니다.

@@ -125,7 +125,7 @@ function isSearchResult(payload: unknown): payload is SearchResult {
     : ''
   return (
     isPositiveInteger(value.rank) &&
-    typeof value.score === 'number' && Number.isFinite(value.score) &&
+    typeof value.score === 'number' && Number.isFinite(value.score) && value.score >= 0 && value.score <= 1 &&
     typeof value.document_id === 'string' && value.document_id.length > 0 &&
     typeof value.document_name === 'string' && value.document_name.length > 0 &&
     typeof value.version_id === 'string' && value.version_id.length > 0 &&
@@ -141,31 +141,51 @@ function parseSearchResponse(payload: unknown): SearchResponse {
     throw invalidResponse('검색 응답 형식이 올바르지 않습니다.')
   }
   const value = payload as Record<string, unknown>
+  const results = value.results
+  if (
+    typeof value.query !== 'string' ||
+    !Array.isArray(results) ||
+    results.some((result) => !isSearchResult(result))
+  ) {
+    throw invalidResponse('검색 응답 형식이 올바르지 않습니다.')
+  }
+
+  const normalizedResults = (results as SearchResult[]).map((result) => ({
+    ...result,
+    source_url: searchResultSourcePath(result.document_id, result.document_version, result.page_number),
+  }))
+  const hasGroundingStatus = Object.prototype.hasOwnProperty.call(value, 'grounding_status')
+  const hasGroundingReason = Object.prototype.hasOwnProperty.call(value, 'grounding_reason')
+  if (!hasGroundingStatus && !hasGroundingReason) {
+    return {
+      query: value.query,
+      grounding_status: normalizedResults.length > 0 ? 'SUPPORTED' : 'INSUFFICIENT_EVIDENCE',
+      grounding_reason: normalizedResults.length > 0 ? null : 'NO_HITS_ABOVE_POLICY',
+      results: normalizedResults,
+    }
+  }
+  if (hasGroundingStatus !== hasGroundingReason) {
+    throw invalidResponse('검색 근거 상태를 확인할 수 없습니다.')
+  }
+
   const validStatus = value.grounding_status === 'SUPPORTED' || value.grounding_status === 'INSUFFICIENT_EVIDENCE'
   const validReason = value.grounding_reason === null || [
     'NO_HITS_ABOVE_POLICY',
     'ONLY_INACTIVE_VERSION_MATCHED',
     'SOURCE_UNAVAILABLE',
   ].includes(String(value.grounding_reason))
-  const results = value.results
-  const hasSupportedEvidence = value.grounding_status === 'SUPPORTED' && value.grounding_reason === null && Array.isArray(results) && results.length > 0
-  const hasInsufficientEvidence = value.grounding_status === 'INSUFFICIENT_EVIDENCE' && value.grounding_reason !== null && Array.isArray(results) && results.length === 0
+  const hasSupportedEvidence = value.grounding_status === 'SUPPORTED' && value.grounding_reason === null && normalizedResults.length > 0
+  const hasInsufficientEvidence = value.grounding_status === 'INSUFFICIENT_EVIDENCE' && value.grounding_reason !== null && normalizedResults.length === 0
   if (
-    typeof value.query !== 'string' ||
     !validStatus ||
     !validReason ||
-    !Array.isArray(results) ||
-    results.some((result) => !isSearchResult(result)) ||
     (!hasSupportedEvidence && !hasInsufficientEvidence)
   ) {
     throw invalidResponse('검색 응답 형식이 올바르지 않습니다.')
   }
   return {
     ...(payload as SearchResponse),
-    results: (results as SearchResult[]).map((result) => ({
-      ...result,
-      source_url: searchResultSourcePath(result.document_id, result.document_version, result.page_number),
-    })),
+    results: normalizedResults,
   }
 }
 

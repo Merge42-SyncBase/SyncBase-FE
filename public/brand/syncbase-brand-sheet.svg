@@ -6,7 +6,6 @@
   <g transform="translate(112 78) scale(1.78)">
     <path fill="#2463DE" d="M8 4h48a4 4 0 0 1 4 4v28c-5-5.4-10.2-8.5-17-8.5H28c-7.5 0-13.6-2.7-18.5-7.5L4 14.5V8a4 4 0 0 1 4-4Z"/>
     <path fill="#FFFFFF" d="M4 22.5C9.5 28 15.8 31.5 24.5 31.5h14c7.5 0 13.5 2.7 18.5 7.5l3 3v14a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4V22.5Z"/>
-    <rect width="6" height="6" x="29" y="27.5" fill="#15A477" rx="1"/>
   </g>
   <text x="260" y="163" fill="#FFFFFF" font-family="Pretendard Variable, Pretendard, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="72" font-weight="750" letter-spacing="-2.6">SyncBase</text>
   <text x="264" y="207" fill="#B8C4D8" font-family="Pretendard Variable, Pretendard, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="22" font-weight="600">Evidence you can trace. 근거까지 이어지는 지식.</text>
@@ -16,7 +15,6 @@
   <g transform="translate(182 435) scale(4.5)">
     <path fill="#2463DE" d="M8 4h48a4 4 0 0 1 4 4v28c-5-5.4-10.2-8.5-17-8.5H28c-7.5 0-13.6-2.7-18.5-7.5L4 14.5V8a4 4 0 0 1 4-4Z"/>
     <path fill="#0E1B2E" d="M4 22.5C9.5 28 15.8 31.5 24.5 31.5h14c7.5 0 13.5 2.7 18.5 7.5l3 3v14a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4V22.5Z"/>
-    <rect width="6" height="6" x="29" y="27.5" fill="#087451" rx="1"/>
   </g>
 
   <g transform="translate(730 350)">
@@ -24,29 +22,26 @@
     <text x="0" y="92" fill="#41536D" font-family="Pretendard Variable, Pretendard, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="21">질문에서 ACTIVE Version과 Original 페이지까지 이어지는</text>
     <text x="0" y="126" fill="#41536D" font-family="Pretendard Variable, Pretendard, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="21">검증 경로를 하나의 S형 이음선으로 압축했습니다.</text>
 
-    <rect x="0" y="185" width="190" height="92" rx="8" fill="#2463DE"/>
+    <rect x="0" y="185" width="292" height="92" rx="8" fill="#2463DE"/>
     <text x="18" y="219" fill="#FFFFFF" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="17" font-weight="700">#2463DE</text>
     <text x="18" y="249" fill="#E9F0FF" font-family="Pretendard Variable, Pretendard, sans-serif" font-size="16">Intent / ACTIVE record</text>
-    <rect x="206" y="185" width="190" height="92" rx="8" fill="#0E1B2E"/>
-    <text x="224" y="219" fill="#FFFFFF" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="17" font-weight="700">#0E1B2E</text>
-    <text x="224" y="249" fill="#B8C4D8" font-family="Pretendard Variable, Pretendard, sans-serif" font-size="16">Controlled base</text>
-    <rect x="412" y="185" width="190" height="92" rx="8" fill="#087451"/>
-    <text x="430" y="219" fill="#FFFFFF" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="17" font-weight="700">#087451</text>
-    <text x="430" y="249" fill="#DCF6EA" font-family="Pretendard Variable, Pretendard, sans-serif" font-size="16">Verified handoff</text>
+    <rect x="310" y="185" width="292" height="92" rx="8" fill="#0E1B2E"/>
+    <text x="328" y="219" fill="#FFFFFF" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="17" font-weight="700">#0E1B2E</text>
+    <text x="328" y="249" fill="#B8C4D8" font-family="Pretendard Variable, Pretendard, sans-serif" font-size="16">Controlled base</text>
 
     <text x="0" y="350" fill="#65758A" font-family="Pretendard Variable, Pretendard, sans-serif" font-size="17" font-weight="700">SMALL-SIZE TEST</text>
     <g transform="translate(0 378)">
       <g transform="scale(.25)">
-        <path fill="#2463DE" d="M8 4h48a4 4 0 0 1 4 4v28c-5-5.4-10.2-8.5-17-8.5H28c-7.5 0-13.6-2.7-18.5-7.5L4 14.5V8a4 4 0 0 1 4-4Z"/><path fill="#0E1B2E" d="M4 22.5C9.5 28 15.8 31.5 24.5 31.5h14c7.5 0 13.5 2.7 18.5 7.5l3 3v14a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4V22.5Z"/><rect width="6" height="6" x="29" y="27.5" fill="#087451" rx="1"/>
+        <path fill="#2463DE" d="M8 4h48a4 4 0 0 1 4 4v28c-5-5.4-10.2-8.5-17-8.5H28c-7.5 0-13.6-2.7-18.5-7.5L4 14.5V8a4 4 0 0 1 4-4Z"/><path fill="#0E1B2E" d="M4 22.5C9.5 28 15.8 31.5 24.5 31.5h14c7.5 0 13.5 2.7 18.5 7.5l3 3v14a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4V22.5Z"/>
       </g>
       <g transform="translate(86 -4) scale(.375)">
-        <path fill="#2463DE" d="M8 4h48a4 4 0 0 1 4 4v28c-5-5.4-10.2-8.5-17-8.5H28c-7.5 0-13.6-2.7-18.5-7.5L4 14.5V8a4 4 0 0 1 4-4Z"/><path fill="#0E1B2E" d="M4 22.5C9.5 28 15.8 31.5 24.5 31.5h14c7.5 0 13.5 2.7 18.5 7.5l3 3v14a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4V22.5Z"/><rect width="6" height="6" x="29" y="27.5" fill="#087451" rx="1"/>
+        <path fill="#2463DE" d="M8 4h48a4 4 0 0 1 4 4v28c-5-5.4-10.2-8.5-17-8.5H28c-7.5 0-13.6-2.7-18.5-7.5L4 14.5V8a4 4 0 0 1 4-4Z"/><path fill="#0E1B2E" d="M4 22.5C9.5 28 15.8 31.5 24.5 31.5h14c7.5 0 13.5 2.7 18.5 7.5l3 3v14a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4V22.5Z"/>
       </g>
       <g transform="translate(184 -8) scale(.5)">
-        <path fill="#2463DE" d="M8 4h48a4 4 0 0 1 4 4v28c-5-5.4-10.2-8.5-17-8.5H28c-7.5 0-13.6-2.7-18.5-7.5L4 14.5V8a4 4 0 0 1 4-4Z"/><path fill="#0E1B2E" d="M4 22.5C9.5 28 15.8 31.5 24.5 31.5h14c7.5 0 13.5 2.7 18.5 7.5l3 3v14a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4V22.5Z"/><rect width="6" height="6" x="29" y="27.5" fill="#087451" rx="1"/>
+        <path fill="#2463DE" d="M8 4h48a4 4 0 0 1 4 4v28c-5-5.4-10.2-8.5-17-8.5H28c-7.5 0-13.6-2.7-18.5-7.5L4 14.5V8a4 4 0 0 1 4-4Z"/><path fill="#0E1B2E" d="M4 22.5C9.5 28 15.8 31.5 24.5 31.5h14c7.5 0 13.5 2.7 18.5 7.5l3 3v14a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4V22.5Z"/>
       </g>
       <g transform="translate(294 -16) scale(.75)">
-        <path fill="#2463DE" d="M8 4h48a4 4 0 0 1 4 4v28c-5-5.4-10.2-8.5-17-8.5H28c-7.5 0-13.6-2.7-18.5-7.5L4 14.5V8a4 4 0 0 1 4-4Z"/><path fill="#0E1B2E" d="M4 22.5C9.5 28 15.8 31.5 24.5 31.5h14c7.5 0 13.5 2.7 18.5 7.5l3 3v14a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4V22.5Z"/><rect width="6" height="6" x="29" y="27.5" fill="#087451" rx="1"/>
+        <path fill="#2463DE" d="M8 4h48a4 4 0 0 1 4 4v28c-5-5.4-10.2-8.5-17-8.5H28c-7.5 0-13.6-2.7-18.5-7.5L4 14.5V8a4 4 0 0 1 4-4Z"/><path fill="#0E1B2E" d="M4 22.5C9.5 28 15.8 31.5 24.5 31.5h14c7.5 0 13.5 2.7 18.5 7.5l3 3v14a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4V22.5Z"/>
       </g>
       <text x="0" y="62" fill="#65758A" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="14">16</text>
       <text x="90" y="62" fill="#65758A" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="14">24</text>
@@ -58,7 +53,7 @@
   <rect x="0" y="842" width="1600" height="158" fill="#14243A"/>
   <text x="72" y="913" fill="#B8C4D8" font-family="Pretendard Variable, Pretendard, sans-serif" font-size="18" font-weight="650">Inverse lockup</text>
   <g transform="translate(250 879) scale(.82)">
-    <path fill="#2463DE" d="M8 4h48a4 4 0 0 1 4 4v28c-5-5.4-10.2-8.5-17-8.5H28c-7.5 0-13.6-2.7-18.5-7.5L4 14.5V8a4 4 0 0 1 4-4Z"/><path fill="#FFFFFF" d="M4 22.5C9.5 28 15.8 31.5 24.5 31.5h14c7.5 0 13.5 2.7 18.5 7.5l3 3v14a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4V22.5Z"/><rect width="6" height="6" x="29" y="27.5" fill="#15A477" rx="1"/>
+    <path fill="#2463DE" d="M8 4h48a4 4 0 0 1 4 4v28c-5-5.4-10.2-8.5-17-8.5H28c-7.5 0-13.6-2.7-18.5-7.5L4 14.5V8a4 4 0 0 1 4-4Z"/><path fill="#FFFFFF" d="M4 22.5C9.5 28 15.8 31.5 24.5 31.5h14c7.5 0 13.5 2.7 18.5 7.5l3 3v14a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4V22.5Z"/>
   </g>
   <text x="322" y="928" fill="#FFFFFF" font-family="Pretendard Variable, Pretendard, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="48" font-weight="750" letter-spacing="-1.7">SyncBase</text>
   <text x="1244" y="916" fill="#8FA0B8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="17">v1 · 2026-08-26</text>

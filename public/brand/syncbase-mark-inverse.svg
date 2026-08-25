@@ -3,5 +3,4 @@
   <desc id="desc">Two aligned record fields separated by an S-shaped evidence seam, designed for dark backgrounds.</desc>
   <path fill="#2463DE" d="M8 4h48a4 4 0 0 1 4 4v28c-5-5.4-10.2-8.5-17-8.5H28c-7.5 0-13.6-2.7-18.5-7.5L4 14.5V8a4 4 0 0 1 4-4Z"/>
   <path fill="#FFFFFF" d="M4 22.5C9.5 28 15.8 31.5 24.5 31.5h14c7.5 0 13.5 2.7 18.5 7.5l3 3v14a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4V22.5Z"/>
-  <rect width="6" height="6" x="29" y="27.5" fill="#15A477" rx="1"/>
 </svg>

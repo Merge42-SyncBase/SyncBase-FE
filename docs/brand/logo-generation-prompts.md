@@ -32,4 +32,4 @@ Change only the rendering and simplification described; keep the two-field-plus-
 Avoid: extra marks, text, labels, page-corner folds, paper icons, gradients, shadows, highlights, bevels, outlines, 3D, perspective, arrowheads, arrows, infinity loops, chain links, database cylinders, clouds, shields, checks, sparkles, circuits, hexagons, watermark.
 ```
 
-Disposition: accepted only as a structure reference. The study clarified the negative-space `S` and the proof node but still introduced gradients. The shipping vectors remove all generated rendering and rebuild the geometry from paths with exact palette values.
+Disposition: accepted only as a structure reference. The study clarified the negative-space `S` but still introduced gradients and an unnecessary proof node. The shipping vectors remove both, rebuilding the identity as exact two-color paths.

@@ -1,0 +1,7 @@
+{
+  "prompt": "The comp is visually strong and structurally readable, but it violates product truth. Make one targeted built-in image edit/regeneration, preserving the entire approved visual structure, palette, typography, workspace switcher, hierarchy, and 1440x1000 frame. Change only factual/capability content: remove unsupported nav items `처리 작업`, `정책`, `데이터 소스`, `설정`, and `지원`; left nav beneath the workspace switcher should contain only `문서` (plus the existing two workspace choices `지식 탐색` and `문서 운영`). Replace the processing overview numbers with the actual demonstrated set: `전체 문서 4`, `검색 가능 4`, `처리 중 1`, `확인 필요 1`. The queue must show exactly these four existing synthetic demo Documents: `인사·복무 운영규정` ACTIVE v3, `정보보안 및 개인정보 처리지침` PROCESSING v3/search v2, `법인카드·출장비 정산규정` FAILED v2/search v1, `신규 입사자 온보딩 가이드` ACTIVE v4. Add a small unobtrusive label `합성 예시 데이터` near the queue heading. Preserve `PDF 등록` and the collapsed `진단 도구`; remove all other invented capabilities or counts. Overwrite the assigned PNG and update its sidecar with the exact edit prompt while keeping approved:false, seedKey, optionId; re-embed exact prompt provenance and verify 1440x1000.",
+  "useCase": "ui-mockup",
+  "approved": false,
+  "seedKey": "53fec278",
+  "optionId": "dual-workspace"
+}

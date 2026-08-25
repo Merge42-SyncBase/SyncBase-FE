@@ -6,6 +6,7 @@ import { isDocumentAdmin } from '../auth/roles'
 import { ErrorNotice } from '../components/ErrorNotice'
 import { PdfPageCanvas } from '../components/PdfPageCanvas'
 import { PdfViewerToolbar } from '../components/PdfViewerToolbar'
+import { safeDestinationForRole } from '../routing/internalPaths'
 import type { Source } from '../types'
 
 export function SourceViewerPage() {
@@ -20,7 +21,11 @@ export function SourceViewerPage() {
   const [zoom, setZoom] = useState(100)
   const [error, setError] = useState('')
   const fallbackReturnTo = isDocumentAdmin(session?.user.role ?? '') ? `/documents/${documentID}` : '/search'
-  const returnTo = safeReturnPath(location.state, fallbackReturnTo)
+  const returnTo = safeDestinationForRole(
+    typeof location.state === 'object' && location.state !== null ? (location.state as Record<string, unknown>).returnTo : null,
+    session?.user.role ?? '',
+    fallbackReturnTo,
+  )
   const returnLabel = returnTo.startsWith('/documents/') ? '문서 상세' : '근거 검색'
 
   useEffect(() => {
@@ -76,11 +81,4 @@ export function SourceViewerPage() {
       </section>
     </div>
   )
-}
-
-function safeReturnPath(state: unknown, fallback: string): string {
-  if (typeof state !== 'object' || state === null) return fallback
-  const returnTo = (state as Record<string, unknown>).returnTo
-  if (typeof returnTo !== 'string' || !returnTo.startsWith('/') || returnTo.startsWith('//') || returnTo.includes('\\')) return fallback
-  return returnTo
 }

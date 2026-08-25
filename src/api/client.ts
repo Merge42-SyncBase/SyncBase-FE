@@ -102,11 +102,26 @@ function isPositiveInteger(value: unknown): value is number {
   return typeof value === 'number' && Number.isInteger(value) && value >= 1
 }
 
+function searchResultSourcePath(documentID: string, version: number, page: number): string {
+  return `/sources/${encodeURIComponent(documentID)}/versions/${version}?page=${page}`
+}
+
+function normalizedSourcePath(value: unknown, expectedPath: string): string | null {
+  if (typeof value !== 'string') return null
+  try {
+    const parsed = new URL(value, 'http://syncbase.invalid')
+    if (!['http:', 'https:'].includes(parsed.protocol) || parsed.username || parsed.password || parsed.hash) return null
+    return `${parsed.pathname}${parsed.search}` === expectedPath ? expectedPath : null
+  } catch {
+    return null
+  }
+}
+
 function isSearchResult(payload: unknown): payload is SearchResult {
   if (typeof payload !== 'object' || payload === null) return false
   const value = payload as Record<string, unknown>
-  const expectedSourceURL = typeof value.document_id === 'string' && isPositiveInteger(value.document_version) && isPositiveInteger(value.page_number)
-    ? `/sources/${encodeURIComponent(value.document_id)}/versions/${value.document_version}?page=${value.page_number}`
+  const expectedSourcePath = typeof value.document_id === 'string' && isPositiveInteger(value.document_version) && isPositiveInteger(value.page_number)
+    ? searchResultSourcePath(value.document_id, value.document_version, value.page_number)
     : ''
   return (
     isPositiveInteger(value.rank) &&
@@ -117,7 +132,7 @@ function isSearchResult(payload: unknown): payload is SearchResult {
     isPositiveInteger(value.document_version) &&
     isPositiveInteger(value.page_number) &&
     typeof value.snippet === 'string' &&
-    value.source_url === expectedSourceURL
+    normalizedSourcePath(value.source_url, expectedSourcePath) !== null
   )
 }
 
@@ -145,7 +160,13 @@ function parseSearchResponse(payload: unknown): SearchResponse {
   ) {
     throw invalidResponse('검색 응답 형식이 올바르지 않습니다.')
   }
-  return payload as SearchResponse
+  return {
+    ...(payload as SearchResponse),
+    results: (results as SearchResult[]).map((result) => ({
+      ...result,
+      source_url: searchResultSourcePath(result.document_id, result.document_version, result.page_number),
+    })),
+  }
 }
 
 function parseSource(payload: unknown): Source {

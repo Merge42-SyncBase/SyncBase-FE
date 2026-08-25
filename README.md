@@ -33,7 +33,7 @@ docker build -t syncbase/web:local .
 - 문서명은 중복을 허용하되 등록 전에 같은 정규화 이름을 안내하며, 목록은 UUID의 짧은 표기를 함께 보여 구분합니다.
 - 검색은 WAS가 MCP `search_documents`를 호출한 결과와 명시적인 grounding 상태만 표시합니다.
 - 원문 화면은 인증된 PDF.js canvas와 text layer로 정확한 Document·Version·페이지를 렌더링합니다.
-- 현재 백엔드가 발급하는 사용자 역할은 `DOCUMENT_ADMIN`뿐입니다. 프론트엔드는 그 외 런타임 역할을 근거 검색으로 안내할 준비가 되어 있지만, 일반 팀원 역할·endpoint RBAC는 별도 백엔드 의존성입니다.
+- 현재 백엔드가 발급하는 사용자 역할은 `DOCUMENT_ADMIN`뿐입니다. 프론트엔드는 그 외 런타임 역할의 메뉴·기본 경로·Document 운영 route를 근거 검색으로 제한할 준비가 되어 있지만, 일반 팀원 역할·endpoint RBAC는 별도 백엔드 의존성입니다.
 
 ## Documentation
 

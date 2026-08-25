@@ -134,7 +134,7 @@ describe('browser API client', () => {
           document_version: 2,
           page_number: 7,
           snippet: '연차 휴가 근거',
-          source_url: '/sources/doc-1/versions/2?page=7',
+          source_url: 'http://web/sources/doc-1/versions/2?page=7',
         }],
       }), { headers: { 'Content-Type': 'application/json' } }))
       .mockResolvedValueOnce(new Response(JSON.stringify({
@@ -152,7 +152,12 @@ describe('browser API client', () => {
     await expect(api.search('연차 휴가')).resolves.toMatchObject({
       grounding_status: 'SUPPORTED',
       grounding_reason: null,
-      results: [{ document_id: 'doc-1', document_version: 2, page_number: 7 }],
+      results: [{
+        document_id: 'doc-1',
+        document_version: 2,
+        page_number: 7,
+        source_url: '/sources/doc-1/versions/2?page=7',
+      }],
     })
     await expect(api.source('doc-1', 2, 7)).resolves.toMatchObject({
       documentId: 'doc-1', version: 2, page: 7,

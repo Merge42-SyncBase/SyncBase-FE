@@ -1,6 +1,7 @@
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthProvider'
 import { isDocumentAdmin, landingPathForRole } from '../auth/roles'
+import { DocumentIcon, SearchIcon } from './Icons'
 
 export function AppShell() {
   const { session, logout } = useAuth()
@@ -24,8 +25,8 @@ export function AppShell() {
           <span><strong>SyncBase</strong><small>{roleLabel}</small></span>
         </NavLink>
         <nav aria-label="주 메뉴">
-          <NavLink to="/search"><SearchIcon />근거 검색</NavLink>
-          {documentAdmin && <NavLink to="/documents"><DocumentIcon />문서 운영</NavLink>}
+          <NavLink to="/search"><SearchIcon className="nav-icon" />근거 검색</NavLink>
+          {documentAdmin && <NavLink to="/documents"><DocumentIcon className="nav-icon" />문서 운영</NavLink>}
         </nav>
         <div className="sidebar-footer">
           <span className="role-name">{roleLabel}</span>
@@ -38,12 +39,4 @@ export function AppShell() {
       </section>
     </div>
   )
-}
-
-function SearchIcon() {
-  return <svg className="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.25" /><path d="m16 16 4 4" /></svg>
-}
-
-function DocumentIcon() {
-  return <svg className="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 3.75h7l4 4v12.5h-11z" /><path d="M13.5 3.75v4h4M9.5 12h5M9.5 15.5h5" /></svg>
 }

@@ -1,4 +1,4 @@
-import { cleanup, render, screen, waitFor, within } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { MemoryRouter } from 'react-router-dom'
@@ -103,6 +103,10 @@ describe('Evidence Workbench search', () => {
     await waitFor(() => expect(api.source).toHaveBeenCalledWith(secondResult.document_id, 2, 34))
     expect(await within(sourcePanel).findByText('경영지원 일반지침 34페이지 PDF')).toBeInTheDocument()
     expect(within(sourcePanel).getByRole('link', { name: /원문 전용 화면/ })).toHaveAttribute('href', secondResult.source_url)
+
+    fireEvent.change(within(sourcePanel).getByRole('spinbutton', { name: /현재 페이지/ }), { target: { value: '999' } })
+    await waitFor(() => expect(api.source).toHaveBeenCalledWith(secondResult.document_id, 2, 58))
+    expect(await within(sourcePanel).findByText('경영지원 일반지침 58페이지 PDF')).toBeInTheDocument()
   })
 
   it.each([

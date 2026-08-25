@@ -2,8 +2,8 @@ import { FormEvent, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { APIError } from '../api/client'
 import { useAuth } from '../auth/AuthProvider'
-import { landingPathForRole } from '../auth/roles'
 import { ErrorNotice } from '../components/ErrorNotice'
+import { safeDestinationForRole } from '../routing/internalPaths'
 
 export function LoginPage() {
   const { login } = useAuth()
@@ -20,7 +20,7 @@ export function LoginPage() {
     setSubmitting(true)
     try {
       const nextSession = await login(username, password)
-      navigate(safeDestination(searchParams.get('next'), landingPathForRole(nextSession.user.role)), { replace: true })
+      navigate(safeDestinationForRole(searchParams.get('next'), nextSession.user.role), { replace: true })
     } catch (reason) {
       setError(reason instanceof APIError ? reason.message : '로그인 요청을 완료하지 못했습니다.')
     } finally {
@@ -64,9 +64,4 @@ export function LoginPage() {
       </div>
     </main>
   )
-}
-
-function safeDestination(value: string | null, fallback: string): string {
-  if (!value || !value.startsWith('/') || value.startsWith('//') || value.includes('\\')) return fallback
-  return value
 }

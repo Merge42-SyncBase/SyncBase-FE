@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react'
 import { Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom'
 import { BrowserRouter } from 'react-router-dom'
 import { AuthProvider, useAuth } from '../auth/AuthProvider'
+import { RequireDocumentAdmin } from '../auth/RequireDocumentAdmin'
 import { landingPathForRole } from '../auth/roles'
 import { AppShell } from '../components/AppShell'
 import { DocumentDetailPage } from '../pages/DocumentDetailPage'
@@ -41,12 +42,14 @@ export function App() {
           <Route element={<RequireSession />}>
             <Route element={<AppShell />}>
               <Route index element={<RoleHome />} />
-              <Route path="/documents" element={<DocumentsPage />} />
-              <Route path="/documents/new" element={<UploadPage />} />
-              <Route path="/documents/:documentID" element={<DocumentDetailPage />} />
-              <Route path="/documents/:documentID/versions/new" element={<UploadPage />} />
               <Route path="/search" element={<Suspense fallback={<main className="app-loading">근거 검색을 불러오는 중입니다.</main>}><SearchPage /></Suspense>} />
               <Route path="/sources/:documentID/versions/:version" element={<Suspense fallback={<main className="app-loading">원문 뷰어를 불러오는 중입니다.</main>}><SourceViewerPage /></Suspense>} />
+              <Route element={<RequireDocumentAdmin />}>
+                <Route path="/documents" element={<DocumentsPage />} />
+                <Route path="/documents/new" element={<UploadPage />} />
+                <Route path="/documents/:documentID" element={<DocumentDetailPage />} />
+                <Route path="/documents/:documentID/versions/new" element={<UploadPage />} />
+              </Route>
               <Route path="*" element={<RoleHome />} />
             </Route>
           </Route>

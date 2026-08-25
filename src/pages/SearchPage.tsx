@@ -2,6 +2,7 @@ import { type FormEvent, useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { APIError, api } from '../api/client'
 import { ErrorNotice } from '../components/ErrorNotice'
+import { DocumentIcon, ExternalIcon, SearchIcon } from '../components/Icons'
 import { PdfPageCanvas } from '../components/PdfPageCanvas'
 import { PdfViewerToolbar } from '../components/PdfViewerToolbar'
 import type { GroundingReason, SearchResponse, SearchResult, Source } from '../types'
@@ -140,6 +141,10 @@ function SelectedEvidence({ result }: { result: SearchResult }) {
   }, [page, result.document_id, result.document_version])
 
   const handleRenderError = useCallback((message: string) => setRenderError(message), [])
+  const movePage = useCallback((nextPage: number) => {
+    if (!source || !Number.isFinite(nextPage)) return
+    setPage(Math.max(1, Math.min(Math.trunc(nextPage), source.pageCount)))
+  }, [source])
 
   return (
     <div className="selected-evidence">
@@ -165,7 +170,7 @@ function SelectedEvidence({ result }: { result: SearchResult }) {
         </div>
       ) : source ? (
         <div className="inline-viewer" aria-label="선택한 검색 결과의 원문">
-          <PdfViewerToolbar source={source} zoom={zoom} onMovePage={setPage} onZoom={setZoom} />
+          <PdfViewerToolbar source={source} zoom={zoom} onMovePage={movePage} onZoom={setZoom} />
           <PdfPageCanvas source={source} zoom={zoom} onError={handleRenderError} />
         </div>
       ) : (
@@ -182,16 +187,4 @@ function SelectedEvidence({ result }: { result: SearchResult }) {
       )}
     </div>
   )
-}
-
-function SearchIcon() {
-  return <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.25" /><path d="m16 16 4 4" /></svg>
-}
-
-function DocumentIcon() {
-  return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 3.75h7l4 4v12.5h-11z" /><path d="M13.5 3.75v4h4M9.5 12h5M9.5 15.5h5" /></svg>
-}
-
-function ExternalIcon() {
-  return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5h5v5M19 5l-8 8" /><path d="M18 13v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" /></svg>
 }

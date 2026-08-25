@@ -11,13 +11,13 @@ Evidence Workbench는 인증된 사용자가 조직 지식을 검색하고, 검�
 | `DOCUMENT_ADMIN` | `/documents` | 근거 검색, 문서 운영 | 프론트엔드와 백엔드 모두 지원 |
 | 그 밖의 런타임 값 | `/search` | 근거 검색 | 프론트엔드 셸만 준비됨 |
 
-`src/auth/roles.ts`는 백엔드에 없는 일반 팀원 역할 이름을 만들어내지 않습니다. `DOCUMENT_ADMIN`만 관리자라고 판정하고, 그 밖의 값은 검색 중심 셸로 보냅니다. 메뉴 숨김은 탐색 경험일 뿐 authorization 경계가 아닙니다. 직접 URL과 `/api/v1` endpoint의 최종 권한 검사는 Go WAS가 담당해야 합니다.
+`src/auth/roles.ts`는 백엔드에 없는 일반 팀원 역할 이름을 만들어내지 않습니다. `DOCUMENT_ADMIN`만 관리자라고 판정하고, 그 밖의 값은 검색 중심 셸로 보냅니다. 프론트엔드는 Document 운영 메뉴를 숨기고 직접 운영 route도 `/search`로 돌려보내지만, 이는 탐색 경험을 위한 방어선이지 authorization 경계가 아닙니다. `/api/v1` endpoint의 최종 권한 검사는 Go WAS가 담당해야 합니다.
 
 현재 `Session` 타입과 백엔드는 `DOCUMENT_ADMIN`만 지원합니다. 실제 일반 팀원 운영을 완료하려면 다음 백엔드 작업이 선행되어야 합니다.
 
 - 일반 팀원 역할의 공식 명칭과 세션 응답 계약 확정
 - 검색·source·raw PDF 읽기 권한과 Document 등록·Version 관리·재시도 권한의 endpoint별 RBAC
-- 새 역할을 포함한 프론트엔드 `User.role` 타입 및 직접 관리자 route의 UX guard 갱신
+- 새 역할을 포함한 프론트엔드 `User.role` 타입 갱신
 - 두 역할을 사용하는 브라우저 통합 테스트
 
 ## Route
@@ -70,7 +70,7 @@ Evidence Workbench는 인증된 사용자가 조직 지식을 검색하고, 검�
 | `INSUFFICIENT_EVIDENCE` | `ONLY_INACTIVE_VERSION_MATCHED` | 이전 Version에만 일치하고 ACTIVE Version에는 근거가 없음 |
 | `INSUFFICIENT_EVIDENCE` | `SOURCE_UNAVAILABLE` | 내부 검색 source를 확인할 수 없음 |
 
-각 검색 결과는 양의 정수 `rank`, 유한한 숫자 `score`, Document와 Version ID, Document 표시 이름, 양의 Version 번호와 페이지 번호, `snippet`, 내부 `source_url`을 포함해야 합니다. 프론트엔드는 snippet을 Original로 가장하지 않으며, 첫 결과를 자동 선택한 뒤 사용자가 다른 결과를 선택할 수 있게 합니다.
+각 검색 결과는 양의 정수 `rank`, 유한한 숫자 `score`, Document와 Version ID, Document 표시 이름, 양의 Version 번호와 페이지 번호, `snippet`, `source_url`을 포함해야 합니다. 기존 WAS/MCP 계약처럼 `source_url`이 절대 URL이어도 내부 `/sources/:documentID/versions/:version?page=:page` 구성요소가 근거 식별자와 일치하면 받아들이고 same-origin 상대 route로 정규화합니다. 프론트엔드는 snippet을 Original로 가장하지 않으며, 첫 결과를 자동 선택한 뒤 사용자가 다른 결과를 선택할 수 있게 합니다.
 
 ## 근거 추적과 PDF 렌더링
 

@@ -16,6 +16,7 @@ import {
 } from '../uploads/state'
 
 const maxSize = 100 * 1024 * 1024
+const registrationUncertaintyWindow = 130_000
 
 interface InitialUploadState {
   error: string
@@ -42,6 +43,8 @@ export function UploadPage() {
   const [dragging, setDragging] = useState(false)
   const [recovery, setRecovery] = useState<UploadRecovery | null>(null)
   const [recoveryActive, setRecoveryActive] = useState(initial.state.submitted)
+  const [canStartNewRegistration, setCanStartNewRegistration] = useState(false)
+  const registrationPostInFlight = useRef(false)
   const [nameMatches, setNameMatches] = useState<DocumentNameMatches | null>(null)
   const [checkingName, setCheckingName] = useState(false)
   const [nameMatchError, setNameMatchError] = useState('')
@@ -61,17 +64,22 @@ export function UploadPage() {
           navigate(next.registration.documentUrl, { replace: true })
           return
         }
-        if (next.status === 'pending') {
+        const submittedAt = state.current.submittedAt
+        const persistedPostMayStillBeInFlight = state.current.submitted && state.current.postFailed !== true &&
+          typeof submittedAt === 'number' && Date.now() - submittedAt < registrationUncertaintyWindow
+        if (next.status === 'pending' || (next.status === 'not_committed' && (registrationPostInFlight.current || persistedPostMayStillBeInFlight))) {
           timer = window.setTimeout(() => void recover(), 2000)
           return
         }
         setRecoveryActive(false)
+        setCanStartNewRegistration(next.status === 'not_committed')
         if (next.status === 'expired') {
           const replacement = NewUploadState(newRequestKey)
           SaveUploadState(initial.storage!, storageKey, replacement)
           state.current = replacement
           setFile(null)
           setPreflight(null)
+          setCanStartNewRegistration(false)
         }
       } catch {
         if (active) timer = window.setTimeout(() => void recover(), 2000)
@@ -111,6 +119,10 @@ export function UploadPage() {
       setError(initial.error)
       return
     }
+    if (recoveryActive && state.current.submitted) {
+      setError('기존 등록 요청의 상태 확인이 끝난 뒤 PDF를 다시 선택하세요.')
+      return
+    }
     const clientError = validateFile(nextFile)
     if (clientError) { setFile(null); setError(clientError); return }
     if (!session) return
@@ -122,6 +134,7 @@ export function UploadPage() {
       state.current = nextState
       setRecovery(null)
       setRecoveryActive(false)
+      setCanStartNewRegistration(false)
       setFile(nextFile)
       setPreflight(next)
       if (!isVersion && !name.trim()) setName(next.suggestedName)
@@ -138,7 +151,7 @@ export function UploadPage() {
     if (!initial.storage) { setError(initial.error); return }
     if (!file || !preflight || !session) { setError('PDF 사전 검사를 먼저 완료하세요.'); return }
     if (!isVersion && !validDocumentName(name)) { setError('문서명은 공백을 제외하고 1~200자여야 합니다.'); return }
-    state.current = { ...state.current, submitted: true }
+    state.current = { ...state.current, submitted: true, submittedAt: Date.now(), postFailed: false }
     try {
       SaveUploadState(initial.storage, storageKey, state.current)
     } catch (reason) {
@@ -146,6 +159,8 @@ export function UploadPage() {
       return
     }
     setBusy(true)
+    registrationPostInFlight.current = true
+    setCanStartNewRegistration(false)
     setRecovery({ status: 'pending' })
     setRecoveryActive(true)
     try {
@@ -153,12 +168,40 @@ export function UploadPage() {
         ? await api.registerVersion(documentID!, file, state.current.requestKey, session.csrfToken)
         : await api.registerDocument(file, name.trim(), state.current.requestKey, session.csrfToken)
       ClearUploadState(initial.storage, storageKey)
+      registrationPostInFlight.current = false
       setRecoveryActive(false)
       navigate(registration.documentUrl)
     } catch (reason) {
-      setError(reason instanceof APIError || reason instanceof Error ? `${reason.message} 복구 상태를 계속 확인합니다.` : '등록 응답을 확인하지 못했습니다. 복구 상태를 계속 확인합니다.')
+      registrationPostInFlight.current = false
+      state.current = { ...state.current, postFailed: true }
+      try {
+        SaveUploadState(initial.storage, storageKey, state.current)
+      } catch {
+        // The in-memory state still prevents premature key rotation in this tab.
+      }
+      setRecoveryActive(true)
+      setError(reason instanceof APIError || reason instanceof Error ? reason.message : '등록 응답을 확인하지 못했습니다.')
     } finally {
       setBusy(false)
+    }
+  }
+
+  function startNewRegistration() {
+    if (!initial.storage) { setError(initial.error); return }
+    try {
+      const replacement = NewUploadState(newRequestKey)
+      SaveUploadState(initial.storage, storageKey, replacement)
+      state.current = replacement
+      registrationPostInFlight.current = false
+      setFile(null)
+      setName('')
+      setPreflight(null)
+      setError('')
+      setRecovery(null)
+      setRecoveryActive(false)
+      setCanStartNewRegistration(false)
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : '새 복구 코드를 저장하지 못했습니다.')
     }
   }
 
@@ -168,8 +211,8 @@ export function UploadPage() {
   return <div className="page-stack narrow-page">
     <header className="page-header"><Link className="back-link" to={isVersion ? `/documents/${documentID}` : '/documents'}>← 취소</Link><h1>{isVersion ? '새 Version 등록' : '새 Document 등록'}</h1><p className="muted">서버가 PDF·페이지·텍스트·SHA-256을 확인한 뒤 처리 대기열에 등록합니다.</p></header>
     {initial.error && <ErrorNotice>{initial.error}</ErrorNotice>}
-    {error && <ErrorNotice>{error}</ErrorNotice>}
-    {recovery && <div className={`notice ${recoveryNoticeTone(recovery.status)}`} role="status">{recoveryMessage(recovery)} <code>{state.current.requestKey}</code>{recovery.status === 'not_committed' && ' 같은 PDF를 다시 선택한 뒤 재제출할 수 있습니다.'}</div>}
+    {error && <ErrorNotice>{error}{recoveryActive && ' 서버의 등록 상태를 다시 확인하고 있습니다.'}</ErrorNotice>}
+    {recovery && <div className={`notice ${recoveryNoticeTone(recovery.status)}`} role="status">{recovery.status === 'not_committed' && recoveryActive ? '등록 승인 결과를 확인하고 있습니다.' : recoveryMessage(recovery)} <code>{state.current.requestKey}</code>{recovery.status === 'not_committed' && !recoveryActive && ' 같은 PDF를 다시 선택해 재시도하거나 새 등록을 시작할 수 있습니다.'}{canStartNewRegistration && <button className="button secondary" type="button" onClick={startNewRegistration}>새 등록 시작</button>}</div>}
     <form className="upload-layout" onSubmit={(event) => void submit(event)} noValidate>
       <section className="panel">
         <div className="panel-header"><h2>1. PDF 선택</h2><p>텍스트 PDF만 지원합니다. 스캔 이미지 OCR은 현재 지원하지 않습니다.</p></div>

@@ -41,6 +41,22 @@ describe('upload recovery state', () => {
     expect(storage.getItem('upload')).toBe('{"requestKey":"current","hash":"hash-b","submitted":false}')
   })
 
+  it('persists whether a submitted POST is still uncertain across refresh', () => {
+    const storage = new MemoryStorage()
+    SaveUploadState(storage, 'upload', {
+      requestKey: 'request-1',
+      hash: 'hash-a',
+      submitted: true,
+      submittedAt: 123456,
+    })
+    expect(LoadUploadState(storage, 'upload', () => 'unused')).toEqual({
+      requestKey: 'request-1',
+      hash: 'hash-a',
+      submitted: true,
+      submittedAt: 123456,
+    })
+  })
+
   it('fails closed when storage cannot retain the recovery key', () => {
     const storage: UploadStorage = {
       getItem: () => null,

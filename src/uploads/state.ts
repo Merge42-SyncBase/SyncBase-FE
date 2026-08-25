@@ -2,6 +2,8 @@ export interface UploadState {
   requestKey: string
   hash?: string
   submitted: boolean
+  submittedAt?: number
+  postFailed?: boolean
 }
 
 export interface UploadStorage {
@@ -16,6 +18,8 @@ type StoredUploadState = {
   hash?: unknown
   sha256?: unknown
   submitted?: unknown
+  submittedAt?: unknown
+  postFailed?: unknown
 }
 
 // NewUploadState creates a key before preflight so an accepted request can be
@@ -51,13 +55,13 @@ export function SaveUploadState(storage: UploadStorage, storageKey: string, stat
 // retried with exactly the same PDF.
 export function BindPreflightHash(current: UploadState, hash: string, replacement: UploadState): UploadState {
   if (current.hash === hash) {
-    return { ...current, submitted: false }
+    return { ...current, submitted: false, submittedAt: undefined, postFailed: undefined }
   }
   if (current.submitted) {
     throw new Error("이 복구 코드는 다른 PDF에 이미 사용되었습니다. 같은 PDF만 다시 제출할 수 있습니다.")
   }
   if (!current.hash) {
-    return { ...current, hash, submitted: false }
+    return { ...current, hash, submitted: false, submittedAt: undefined, postFailed: undefined }
   }
   return { ...replacement, hash, submitted: false }
 }
@@ -77,7 +81,13 @@ function parseUploadState(serialized: string | null): UploadState | null {
     const hash = typeof value.hash === "string"
       ? value.hash
       : typeof value.sha256 === "string" ? value.sha256 : undefined
-    return { requestKey, hash, submitted: value.submitted === true }
+    const submittedAt = typeof value.submittedAt === 'number' && Number.isFinite(value.submittedAt) && value.submittedAt > 0
+      ? value.submittedAt
+      : undefined
+    const state: UploadState = { requestKey, hash, submitted: value.submitted === true }
+    if (submittedAt !== undefined) state.submittedAt = submittedAt
+    if (value.postFailed === true) state.postFailed = true
+    return state
   } catch {
     return null
   }

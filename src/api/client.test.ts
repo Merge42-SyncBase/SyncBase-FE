@@ -45,7 +45,7 @@ describe('browser API client', () => {
     })
   })
 
-  it('normalizes a valid legacy search response during a rolling deployment', async () => {
+  it('fails closed when a legacy search response omits grounding metadata', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({
       query: '검증 질문',
       results: [{
@@ -61,10 +61,11 @@ describe('browser API client', () => {
       }],
     }), { status: 200, headers: { 'Content-Type': 'application/json' } })))
 
-    await expect(api.search('검증 질문')).resolves.toMatchObject({
-      grounding_status: 'SUPPORTED',
-      grounding_reason: null,
-      results: [{ document_version: 2, page_number: 3 }],
+    await expect(api.search('검증 질문')).resolves.toEqual({
+      query: '검증 질문',
+      grounding_status: 'INSUFFICIENT_EVIDENCE',
+      grounding_reason: 'SOURCE_UNAVAILABLE',
+      results: [],
     })
   })
 

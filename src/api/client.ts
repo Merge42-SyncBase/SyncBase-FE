@@ -159,9 +159,9 @@ function parseSearchResponse(payload: unknown): SearchResponse {
   if (!hasGroundingStatus && !hasGroundingReason) {
     return {
       query: value.query,
-      grounding_status: normalizedResults.length > 0 ? 'SUPPORTED' : 'INSUFFICIENT_EVIDENCE',
-      grounding_reason: normalizedResults.length > 0 ? null : 'NO_HITS_ABOVE_POLICY',
-      results: normalizedResults,
+      grounding_status: 'INSUFFICIENT_EVIDENCE',
+      grounding_reason: normalizedResults.length > 0 ? 'SOURCE_UNAVAILABLE' : 'NO_HITS_ABOVE_POLICY',
+      results: [],
     }
   }
   if (hasGroundingStatus !== hasGroundingReason) {
